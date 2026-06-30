@@ -1,8 +1,8 @@
 import { useState, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { FileText, ShieldCheck, RefreshCw, ChevronRight, CheckSquare, Square, Tag } from 'lucide-react'
+import { FileText, ShieldCheck, RefreshCw, ChevronRight, CheckSquare, Square, Tag, Check } from 'lucide-react'
 import { Button, Card, Badge, TopBar } from '../components/ui'
-import type { Screen } from '../lib/types'
+import type { Screen } from '../types'
 
 interface Props { onNavigate: (s: Screen) => void; file: File | null }
 
@@ -114,7 +114,7 @@ export default function Confirm({ onNavigate, file }: Props) {
                       </div>
                       {docType.id === dt.id && (
                         <div className="w-5 h-5 rounded-full bg-orange-500 flex items-center justify-center flex-shrink-0">
-                          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3"><polyline points="20 6 9 17 4 12"/></svg>
+                          <Check className="w-2.5 h-2.5 text-white" strokeWidth={3} />
                         </div>
                       )}
                     </button>

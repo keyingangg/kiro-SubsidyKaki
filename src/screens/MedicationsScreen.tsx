@@ -4,9 +4,9 @@ import { ChevronDown, Bell, Clock, AlertCircle } from 'lucide-react'
 import { Card, TopBar } from '../components/ui'
 import TTSButton from '../components/TTSButton'
 import { MOCK_RESULT } from '../lib/utils'
-import { useTTS, buildMedSummary } from '../lib/tts'
-import { useLang, T } from '../lib/i18n'
-import type { Medication, Screen } from '../lib/types'
+import { useTTS, buildMedSummary } from '../hooks/useTTS'
+import { useLang, T } from '../hooks/i18n'
+import type { Medication, Screen } from '../types'
 
 interface Props { onNavigate: (s: Screen) => void }
 

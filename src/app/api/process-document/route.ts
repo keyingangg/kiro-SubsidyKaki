@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
-import { geminiModel } from "@/lib/gemini";
-import { createClient } from "@/lib/supabase/server";
+import { geminiModel } from "@/services/gemini";
+import { createClient } from "@/services/supabase/server";
 
 const EXTRACTION_PROMPT = `You are a medical document parser for Singapore's subsidy system.
 

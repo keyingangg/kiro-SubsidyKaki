@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import { User, Type, Globe, Bell, Shield, Info, ChevronRight, Volume2 } from 'lucide-react'
 import { Card, Toggle, TopBar } from '../components/ui'
-import { useLang, T } from '../lib/i18n'
-import { useTTS } from '../lib/tts'
+import { useLang, T } from '../hooks/i18n'
+import { useTTS } from '../hooks/useTTS'
 import TTSButton from '../components/TTSButton'
-import type { Screen, Language } from '../lib/types'
+import type { Screen, Language } from '../types'
 
 interface Props { onNavigate: (s: Screen) => void }
 

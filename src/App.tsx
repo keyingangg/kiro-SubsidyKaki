@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Home as HomeIcon, History, HelpCircle, Settings as SettingsIcon } from 'lucide-react'
 
-import { LangProvider, useLang, T } from './lib/i18n'
+import { LangProvider, useLang, T } from './hooks/i18n'
 
 import HomeScreen        from './screens/Home'
 import CameraScreen      from './screens/Camera'
@@ -17,7 +17,7 @@ import HelpScreen        from './screens/Help'
 import SettingsScreen    from './screens/Settings'
 import ErrorScreen       from './screens/ErrorScreen'
 
-import type { Screen, SubsidyCard } from './lib/types'
+import type { Screen, SubsidyCard } from './types'
 
 const SHOW_NAV: Screen[] = ['home', 'history', 'help', 'settings']
 

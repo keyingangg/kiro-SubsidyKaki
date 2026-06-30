@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ShieldCheck } from 'lucide-react'
-import type { Screen } from '../lib/types'
+import type { Screen } from '../types'
 
 interface Props { onNavigate: (s: Screen) => void }
 

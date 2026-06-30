@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 import { X, Camera, Zap } from 'lucide-react'
-import type { Screen } from '../lib/types'
+import type { Screen } from '../types'
 
 interface Props { onNavigate: (s: Screen) => void; onFileReady: (f: File) => void }
 

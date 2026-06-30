@@ -2,7 +2,7 @@ import { motion } from 'framer-motion'
 import { CheckCircle2, XCircle, Phone, ChevronRight } from 'lucide-react'
 import { Button, Card, Badge, TopBar, Divider } from '../components/ui'
 import { MOCK_RESULT } from '../lib/utils'
-import type { Screen, SubsidyCard } from '../lib/types'
+import type { Screen, SubsidyCard } from '../types'
 
 interface Props { onNavigate: (s: Screen) => void; subsidy: SubsidyCard | null }
 

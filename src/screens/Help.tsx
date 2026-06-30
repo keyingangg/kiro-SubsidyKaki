@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Search, ChevronDown, Phone, Mail, MessageCircle, ThumbsUp, ThumbsDown } from 'lucide-react'
+import { Search, ChevronDown, ChevronRight, Phone, Mail, MessageCircle, ThumbsUp, ThumbsDown } from 'lucide-react'
 import { Card, TopBar } from '../components/ui'
-import type { Screen } from '../lib/types'
+import type { Screen } from '../types'
 
 interface Props { onNavigate: (s: Screen) => void }
 
@@ -141,7 +141,7 @@ export default function Help({ onNavigate }: Props) {
                   <p className="text-base font-semibold text-neutral-900">{c.label}</p>
                   <p className="text-sm text-neutral-400">{c.sub}</p>
                 </div>
-                <svg className="w-4 h-4 text-neutral-300 ml-auto" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M9 18l6-6-6-6"/></svg>
+                <ChevronRight className="w-4 h-4 text-neutral-300 ml-auto" strokeWidth={2.5} />
               </button>
             ))}
           </div>

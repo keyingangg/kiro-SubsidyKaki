@@ -13,8 +13,13 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Mediscan",
+  title: "HealthKaki",
   description: "Clearer bills. Safer doses. Total peace of mind.",
+  icons: {
+    icon: "/healthkaki_logo.png",
+    shortcut: "/healthkaki_logo.png",
+    apple: "/healthkaki_logo.png",
+  },
 };
 
 export default function RootLayout({

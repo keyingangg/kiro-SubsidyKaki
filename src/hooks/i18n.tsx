@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState } from 'react'
-import type { Language } from './types'
+import type { Language } from '../types'
 
 interface LangCtx {
   language: Language

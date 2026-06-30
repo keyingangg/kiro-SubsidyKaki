@@ -1,7 +1,7 @@
 import { Volume2, VolumeX, Loader } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { cn } from '../lib/utils'
-import { useLang, T } from '../lib/i18n'
+import { useLang, T } from '../hooks/i18n'
 
 interface TTSButtonProps {
   text: string

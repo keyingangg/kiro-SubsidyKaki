@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import type { Language } from './types'
+import type { Language } from '../types'
 
 const LANG_CODES: Record<Language, string> = {
   en: 'en-SG',

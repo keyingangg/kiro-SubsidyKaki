@@ -3,9 +3,9 @@ import { CheckCircle2, XCircle, Download } from 'lucide-react'
 import { Card, TopBar, Divider, Button } from '../components/ui'
 import TTSButton from '../components/TTSButton'
 import { MOCK_RESULT } from '../lib/utils'
-import { useTTS } from '../lib/tts'
-import { useLang, T } from '../lib/i18n'
-import type { Screen } from '../lib/types'
+import { useTTS } from '../hooks/useTTS'
+import { useLang, T } from '../hooks/i18n'
+import type { Screen } from '../types'
 
 interface Props { onNavigate: (s: Screen) => void }
 

@@ -3,9 +3,9 @@ import { Share2, Printer, MessageCircle, ChevronRight, BadgeCheck, FileText, Pil
 import { Button, Card, Badge, TopBar, Divider } from '../components/ui'
 import TTSButton from '../components/TTSButton'
 import { MOCK_RESULT } from '../lib/utils'
-import { useTTS, buildResultsSummary } from '../lib/tts'
-import { useLang, T } from '../lib/i18n'
-import type { Screen, SubsidyCard } from '../lib/types'
+import { useTTS, buildResultsSummary } from '../hooks/useTTS'
+import { useLang, T } from '../hooks/i18n'
+import type { Screen, SubsidyCard } from '../types'
 
 interface Props {
   onNavigate: (s: Screen) => void

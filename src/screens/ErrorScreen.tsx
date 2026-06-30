@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion'
 import { Upload, WifiOff, FileX, AlertTriangle, RefreshCw, Phone, CheckCircle2 } from 'lucide-react'
 import { Button } from '../components/ui'
-import type { Screen, ErrorType } from '../lib/types'
+import type { Screen, ErrorType } from '../types'
 
 interface Props { onNavigate: (s: Screen) => void; errorType?: ErrorType }
 

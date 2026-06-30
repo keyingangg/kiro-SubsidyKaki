@@ -1,4 +1,5 @@
 import React from 'react'
+import { ChevronLeft } from 'lucide-react'
 import { cn } from '../lib/utils'
 
 /* ── Button ──────────────────────────────────────────────────── */
@@ -128,7 +129,7 @@ export function TopBar({ title, subtitle, onBack, right }: TopBarProps) {
           className="w-10 h-10 rounded-full bg-neutral-100 flex items-center justify-center text-neutral-600 hover:bg-neutral-200 transition-colors flex-shrink-0"
           aria-label="Go back"
         >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M15 18l-6-6 6-6"/></svg>
+          <ChevronLeft className="w-5 h-5" strokeWidth={2.5} />
         </button>
       )}
       <div className="flex-1 min-w-0">

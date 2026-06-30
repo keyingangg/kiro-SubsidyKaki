@@ -3,8 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Trash2, BarChart2, ChevronRight } from 'lucide-react'
 import { TopBar } from '../components/ui'
 import { MOCK_HISTORY } from '../lib/utils'
-import { useLang } from '../lib/i18n'
-import type { Screen, HistoryItem } from '../lib/types'
+import { useLang } from '../hooks/i18n'
+import type { Screen, HistoryItem } from '../types'
 
 interface Props { onNavigate: (s: Screen) => void }
 
