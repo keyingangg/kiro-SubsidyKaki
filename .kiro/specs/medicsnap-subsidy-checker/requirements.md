@@ -15,7 +15,6 @@ HealthKaki is a Singapore medical assistant application targeting elderly users 
 - **NRIC**: Singapore National Registration Identity Card number, formatted as one letter prefix [S/T/F/G], seven digits, and one letter suffix (e.g., S1234567A)
 - **Medical_Document**: A receipt, bill, referral letter, or other healthcare-related document from a Singapore medical institution
 - **Subsidy_Result**: The computed eligibility information including scheme name, coverage percentage, and applicable conditions
-- **Document_Submission**: A stored record in Supabase containing the extracted data from a processed medical document
 - **Medication_Scanner**: The component responsible for capturing medication label images and coordinating OCR extraction of medication purpose and dosage frequency information
 - **Medication_Label**: An official printed label on medicine packaging, including pharmacy-printed stickers and manufacturer labels, containing medication name, purpose, and dosage instructions
 - **Medication_Result**: The structured output containing the medication name, translated purpose description, and dosage frequency in the user's selected language
