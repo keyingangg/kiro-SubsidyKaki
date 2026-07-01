@@ -34,7 +34,7 @@ export default function LanguageToggle({ current, onChange }: LanguageToggleProp
             onClick={() => onChange(option.value)}
             className={cn(
               "min-w-[44px] min-h-[44px] px-3 py-2 rounded-lg text-sm font-semibold transition-colors",
-              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400 focus-visible:ring-offset-1",
+              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-1",
               isSelected
                 ? "bg-white text-neutral-900 shadow-sm"
                 : "text-neutral-600 hover:text-neutral-900 hover:bg-neutral-200"

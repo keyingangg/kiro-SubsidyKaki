@@ -13,8 +13,8 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     <button
       ref={ref}
       className={cn(
-        'inline-flex items-center justify-center font-semibold rounded-xl transition-all duration-150 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-orange-400/40 disabled:opacity-50 disabled:pointer-events-none touch-target',
-        variant === 'primary'   && 'bg-orange-500 text-white hover:bg-orange-600 shadow-btn-orange',
+        'inline-flex items-center justify-center font-semibold rounded-xl transition-all duration-150 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-500/40 disabled:opacity-50 disabled:pointer-events-none touch-target',
+        variant === 'primary'   && 'bg-teal-700 text-white hover:bg-teal-800 shadow-btn-teal',
         variant === 'teal'      && 'bg-teal-500 text-white hover:bg-teal-600 shadow-btn-teal',
         variant === 'secondary' && 'bg-white text-navy-500 border border-neutral-300 hover:bg-neutral-50 shadow-card',
         variant === 'ghost'     && 'text-navy-500 hover:bg-neutral-100',
@@ -94,8 +94,8 @@ export function Toggle({ checked, onChange, id, label, sublabel }: ToggleProps) 
         aria-checked={checked}
         onClick={() => onChange(!checked)}
         className={cn(
-          'relative w-12 h-7 rounded-full transition-colors duration-200 focus-visible:ring-4 focus-visible:ring-orange-400/40 focus-visible:outline-none flex-shrink-0',
-          checked ? 'bg-orange-500' : 'bg-neutral-300'
+          'relative w-12 h-7 rounded-full transition-colors duration-200 focus-visible:ring-4 focus-visible:ring-teal-500/40 focus-visible:outline-none flex-shrink-0',
+          checked ? 'bg-teal-700' : 'bg-neutral-300'
         )}
       >
         <motion.span

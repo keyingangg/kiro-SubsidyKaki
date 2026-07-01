@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ShieldCheck } from 'lucide-react'
+import { useLang, T } from '../hooks/i18n'
 import type { ProcessDocumentResponse } from '../types'
 
 interface Props {
@@ -8,20 +9,6 @@ interface Props {
   onComplete: (data: ProcessDocumentResponse) => void
   onError: (message: string) => void
 }
-
-const STAGES = [
-  { label: 'Scanning document…',       sub: 'Reading text and medical codes',          pct: 25 },
-  { label: 'Redacting identifiers…',    sub: 'Removing NRIC-like identifiers from results', pct: 50 },
-  { label: 'Checking your subsidies…', sub: 'Matching against MOH subsidy frameworks', pct: 75 },
-  { label: 'Preparing results…',       sub: 'Formatting the returned subsidy matches', pct: 100 },
-]
-
-const MESSAGES = [
-  'Your data is processed securely',
-  'Uploaded files are not saved by this app',
-  'NRIC-like identifiers are redacted from results',
-  'Checking Pioneer, CHAS & Merdeka eligibility',
-]
 
 function isProcessDocumentResponse(value: unknown): value is ProcessDocumentResponse {
   if (!value || typeof value !== 'object') return false
@@ -39,6 +26,23 @@ function isProcessDocumentResponse(value: unknown): value is ProcessDocumentResp
 }
 
 export default function Processing({ file, onComplete, onError }: Props) {
+  const { language } = useLang()
+  const t = T[language]
+
+  const STAGES = [
+    { label: t.stage_scanning,   sub: t.stage_scanning_sub,   pct: 25 },
+    { label: t.stage_redacting,  sub: t.stage_redacting_sub,  pct: 50 },
+    { label: t.stage_checking,   sub: t.stage_checking_sub,   pct: 75 },
+    { label: t.stage_preparing,  sub: t.stage_preparing_sub,  pct: 100 },
+  ]
+
+  const MESSAGES = [
+    t.msg_secure,
+    t.msg_not_saved,
+    t.msg_redacted,
+    t.msg_checking,
+  ]
+
   const [stageIdx, setStageIdx] = useState(0)
   const [msgIdx, setMsgIdx]     = useState(0)
   const [done, setDone]         = useState(false)
@@ -125,7 +129,7 @@ export default function Processing({ file, onComplete, onError }: Props) {
           <motion.circle
             cx="104" cy="104" r={r}
             fill="none"
-            stroke={done ? '#06A77D' : '#F77F00'}
+            stroke={done ? '#06A77D' : '#1A7070'}
             strokeWidth="10"
             strokeLinecap="round"
             strokeDasharray={circ}
@@ -137,10 +141,10 @@ export default function Processing({ file, onComplete, onError }: Props) {
         {/* Pulsing rings */}
         {!done && (
           <>
-            <motion.div className="absolute inset-6 rounded-full border-2 border-orange-200"
+            <motion.div className="absolute inset-6 rounded-full border-2 border-teal-100"
               animate={{ scale: [1, 1.06, 1], opacity: [0.5, 1, 0.5] }}
               transition={{ duration: 2, repeat: Infinity }} />
-            <motion.div className="absolute inset-10 rounded-full border-2 border-orange-300"
+            <motion.div className="absolute inset-10 rounded-full border-2 border-teal-200"
               animate={{ scale: [1, 1.05, 1], opacity: [0.7, 1, 0.7] }}
               transition={{ duration: 2, repeat: Infinity, delay: 0.4 }} />
           </>
@@ -155,7 +159,7 @@ export default function Processing({ file, onComplete, onError }: Props) {
               </motion.div>
             ) : (
               <motion.span key={pct} initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }}
-                className="text-2xl font-bold text-orange-500"
+                className="text-2xl font-bold text-teal-700"
               >
                 {pct}%
               </motion.span>
@@ -172,10 +176,10 @@ export default function Processing({ file, onComplete, onError }: Props) {
           className="text-center mb-8"
         >
           <h2 className="text-xl font-bold text-neutral-900 mb-2">
-            {done ? 'Analysis complete!' : STAGES[stageIdx].label}
+            {done ? t.analysis_done : STAGES[stageIdx].label}
           </h2>
           <p className="text-base text-neutral-500">
-            {done ? 'Your subsidy breakdown is ready.' : STAGES[stageIdx].sub}
+            {done ? t.analysis_sub : STAGES[stageIdx].sub}
           </p>
         </motion.div>
       </AnimatePresence>
@@ -184,7 +188,7 @@ export default function Processing({ file, onComplete, onError }: Props) {
       <div className="flex gap-2 mb-8">
         {STAGES.map((_, i) => (
           <motion.div key={i} className="h-2 rounded-full"
-            animate={{ width: i === stageIdx && !done ? 24 : 8, backgroundColor: done || i <= stageIdx ? '#F77F00' : '#D0D0D0' }}
+            animate={{ width: i === stageIdx && !done ? 24 : 8, backgroundColor: done || i <= stageIdx ? '#1A7070' : '#D0D0D0' }}
             transition={{ duration: 0.3 }}
           />
         ))}

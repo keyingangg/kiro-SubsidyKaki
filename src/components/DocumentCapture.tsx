@@ -183,9 +183,9 @@ export default function DocumentCapture({
               disabled={!cameraAvailable}
               className={cn(
                 "flex items-center justify-center gap-3 w-full min-h-[44px] min-w-[44px] px-6 py-4 rounded-xl text-lg font-semibold transition-colors",
-                "focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-orange-400/40",
+                "focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-500/40",
                 cameraAvailable
-                  ? "bg-orange-500 text-white hover:bg-orange-600 active:bg-orange-700"
+                  ? "bg-teal-700 text-white hover:bg-teal-800 active:bg-teal-800"
                   : "bg-neutral-200 text-neutral-400 cursor-not-allowed"
               )}
               aria-label="Take photo with camera"
@@ -200,8 +200,8 @@ export default function DocumentCapture({
               onClick={handleUploadClick}
               className={cn(
                 "flex items-center justify-center gap-3 w-full min-h-[44px] min-w-[44px] px-6 py-4 rounded-xl text-lg font-semibold transition-colors",
-                "focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-orange-400/40",
-                "bg-white text-neutral-700 border-2 border-neutral-300 hover:border-orange-400 hover:text-orange-600 active:bg-neutral-50"
+                "focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-500/40",
+                "bg-white text-neutral-700 border-2 border-neutral-300 hover:border-teal-500 hover:text-teal-700 active:bg-neutral-50"
               )}
               aria-label="Upload file from device"
             >
@@ -300,7 +300,7 @@ export default function DocumentCapture({
       {/* Submitting State (when parent isProcessing is true but we haven't transitioned) */}
       {state === "submitting" && !isProcessing && (
         <div className="flex flex-col items-center gap-4">
-          <span className="w-12 h-12 border-4 border-orange-200 border-t-orange-500 rounded-full animate-spin" />
+          <span className="w-12 h-12 border-4 border-teal-100 border-t-teal-700 rounded-full animate-spin" />
           <p className="text-lg text-neutral-600">Submitting document...</p>
         </div>
       )}
@@ -325,8 +325,8 @@ export default function DocumentCapture({
             onClick={handleRetry}
             className={cn(
               "flex items-center justify-center gap-2 min-h-[44px] min-w-[44px] px-6 py-3 rounded-xl text-lg font-semibold transition-colors",
-              "focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-orange-400/40",
-              "bg-orange-500 text-white hover:bg-orange-600 active:bg-orange-700"
+              "focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-500/40",
+              "bg-teal-700 text-white hover:bg-teal-800 active:bg-teal-800"
             )}
             aria-label="Try again"
           >

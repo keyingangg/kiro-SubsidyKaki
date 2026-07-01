@@ -48,13 +48,13 @@ export default function LoadingProgress({
       <div className="relative flex items-center justify-center w-[48px] h-[48px]">
         {/* Outer pulsing ring */}
         <motion.div
-          className="absolute inset-0 rounded-full border-4 border-orange-200"
+          className="absolute inset-0 rounded-full border-4 border-teal-100"
           animate={{ scale: [1, 1.2, 1], opacity: [0.6, 0.2, 0.6] }}
           transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
         />
         {/* Spinning border */}
         <motion.div
-          className="w-[48px] h-[48px] rounded-full border-4 border-neutral-200 border-t-orange-500"
+          className="w-[48px] h-[48px] rounded-full border-4 border-neutral-200 border-t-teal-700"
           animate={{ rotate: 360 }}
           transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
         />

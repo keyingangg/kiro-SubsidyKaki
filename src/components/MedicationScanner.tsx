@@ -187,7 +187,7 @@ export function MedicationScanner({
               "inline-flex items-center justify-center gap-2 font-semibold rounded-xl transition-all duration-150",
               "bg-white text-neutral-700 border border-neutral-300 hover:bg-neutral-50",
               "text-base px-5 py-3 min-h-[44px] min-w-[44px]",
-              "active:scale-[0.97] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-orange-400/40",
+              "active:scale-[0.97] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-500/40",
               "disabled:opacity-50 disabled:pointer-events-none"
             )}
           >
@@ -217,7 +217,7 @@ export function MedicationScanner({
                 "flex-1 inline-flex items-center justify-center gap-2 font-semibold rounded-xl transition-all duration-150",
                 "bg-white text-neutral-700 border border-neutral-300 hover:bg-neutral-50 shadow-sm",
                 "text-base px-4 py-3 min-h-[44px] min-w-[44px]",
-                "active:scale-[0.97] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-orange-400/40",
+                "active:scale-[0.97] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-500/40",
                 "disabled:opacity-50 disabled:pointer-events-none"
               )}
               aria-label="Retake photo"
@@ -285,7 +285,7 @@ export function MedicationScanner({
               "w-full max-w-sm inline-flex items-center justify-center gap-2 font-semibold rounded-xl transition-all duration-150",
               "bg-white text-neutral-700 border border-neutral-300 hover:bg-neutral-50 shadow-sm",
               "text-base px-5 py-3 min-h-[44px] min-w-[44px]",
-              "active:scale-[0.97] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-orange-400/40",
+              "active:scale-[0.97] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-500/40",
               "disabled:opacity-50 disabled:pointer-events-none"
             )}
             aria-label="Upload medication label image from gallery"

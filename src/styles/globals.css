@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+html {
+  font-size: 16px;
+}
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
@@ -23,4 +27,106 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+/* ── High contrast mode ───────────────────────────────────────── */
+html.high-contrast {
+  --hc-bg: #ffffff;
+  --hc-surface: #ffffff;
+  --hc-border: #000000;
+  --hc-text: #000000;
+  --hc-text-muted: #333333;
+  --hc-primary: #004040;
+  --hc-primary-text: #ffffff;
+}
+
+html.high-contrast body {
+  background: var(--hc-bg);
+  color: var(--hc-text);
+}
+
+/* Backgrounds */
+html.high-contrast .bg-neutral-50,
+html.high-contrast .bg-neutral-100 {
+  background-color: #f0f0f0 !important;
+}
+
+html.high-contrast .bg-white {
+  background-color: #ffffff !important;
+}
+
+/* Text colours */
+html.high-contrast .text-neutral-400,
+html.high-contrast .text-neutral-500,
+html.high-contrast .text-neutral-600 {
+  color: #333333 !important;
+}
+
+html.high-contrast .text-neutral-700,
+html.high-contrast .text-neutral-900 {
+  color: #000000 !important;
+}
+
+/* Borders — make all borders black */
+html.high-contrast .border,
+html.high-contrast .border-neutral-200,
+html.high-contrast .border-neutral-300,
+html.high-contrast [class*="border-neutral"] {
+  border-color: #000000 !important;
+}
+
+/* Teal brand elements → deep teal for contrast */
+html.high-contrast .text-teal-700,
+html.high-contrast .text-teal-500,
+html.high-contrast .text-teal-600 {
+  color: #004040 !important;
+}
+
+html.high-contrast .bg-teal-700 {
+  background-color: #004040 !important;
+}
+
+html.high-contrast .bg-teal-50,
+html.high-contrast .bg-teal-100 {
+  background-color: #d0f0ee !important;
+  border-color: #004040 !important;
+}
+
+html.high-contrast [class*="border-teal"] {
+  border-color: #004040 !important;
+}
+
+/* Navy → true black */
+html.high-contrast .text-navy-500,
+html.high-contrast .text-navy-600 {
+  color: #000000 !important;
+}
+
+/* Buttons */
+html.high-contrast button:focus-visible {
+  outline: 3px solid #000000 !important;
+  outline-offset: 2px !important;
+}
+
+/* Cards — stronger shadow becomes border */
+html.high-contrast .shadow-card,
+html.high-contrast .shadow-card-md {
+  box-shadow: none !important;
+  border: 2px solid #000000 !important;
+}
+
+/* Inputs */
+html.high-contrast input[type="text"],
+html.high-contrast input[type="range"] {
+  border-color: #000000 !important;
+}
+
+/* Success / info tones → keep readable */
+html.high-contrast .text-success-500 {
+  color: #005500 !important;
+}
+
+html.high-contrast .bg-success-50 {
+  background-color: #ccffcc !important;
+  border-color: #005500 !important;
 }

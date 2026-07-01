@@ -17,7 +17,7 @@ function PrescriptionCard({ item, open, onToggle }: { item: ExtractedPrescriptio
     <div className="p-4">
       <div className="flex items-start gap-3">
         <div className="w-12 h-12 rounded-xl bg-teal-50 border border-teal-200 grid place-items-center flex-shrink-0"><Pill className="w-6 h-6 text-teal-500" /></div>
-        <div className="flex-1 min-w-0"><p className="text-base font-bold text-neutral-900">{item.medicationName}</p>{item.dosage && <span className="mt-2 inline-flex items-center gap-1.5 bg-orange-50 border border-orange-200 text-orange-600 text-xs font-semibold px-2.5 py-1 rounded-full">💊 {item.dosage}</span>}</div>
+        <div className="flex-1 min-w-0"><p className="text-base font-bold text-neutral-900">{item.medicationName}</p>{item.dosage && <span className="mt-2 inline-flex items-center gap-1.5 bg-teal-50 border border-teal-200 text-teal-700 text-xs font-semibold px-2.5 py-1 rounded-full">💊 {item.dosage}</span>}</div>
         <TTSButton text={summary(item)} speaking={speaking} onToggle={toggle} size="sm" variant="icon" />
       </div>
       {item.frequency && <span className="mt-3 inline-flex items-center gap-1.5 bg-navy-50 border border-navy-100 text-navy-500 text-xs font-semibold px-2.5 py-1 rounded-full"><Clock className="w-3 h-3" />{item.frequency}</span>}

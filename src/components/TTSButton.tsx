@@ -22,11 +22,11 @@ export default function TTSButton({ text, className, size = 'md', variant = 'pil
         whileTap={{ scale: 0.92 }}
         onClick={() => onToggle(text)}
         className={cn(
-          'rounded-full flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-orange-400/40',
+          'rounded-full flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-500/40',
           size === 'sm' && 'w-8 h-8',
           size === 'md' && 'w-10 h-10',
           size === 'lg' && 'w-12 h-12',
-          speaking ? 'bg-orange-500 text-white' : 'bg-neutral-100 text-neutral-500 hover:bg-neutral-200',
+          speaking ? 'bg-teal-700 text-white' : 'bg-neutral-100 text-neutral-500 hover:bg-neutral-200',
           className
         )}
         aria-label={speaking ? 'Stop reading' : 'Read aloud'}
@@ -44,13 +44,13 @@ export default function TTSButton({ text, className, size = 'md', variant = 'pil
       whileTap={{ scale: 0.96 }}
       onClick={() => onToggle(text)}
       className={cn(
-        'inline-flex items-center gap-2 font-semibold rounded-full border transition-all focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-orange-400/40',
+        'inline-flex items-center gap-2 font-semibold rounded-full border transition-all focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-500/40',
         size === 'sm' && 'text-xs px-3 py-1.5 min-h-[34px]',
         size === 'md' && 'text-sm px-4 py-2.5 min-h-[44px]',
         size === 'lg' && 'text-base px-5 py-3 min-h-[52px]',
         speaking
-          ? 'bg-orange-500 text-white border-orange-500 shadow-btn-orange'
-          : 'bg-white text-navy-500 border-neutral-300 hover:border-orange-400 hover:text-orange-500',
+          ? 'bg-teal-700 text-white border-teal-700 shadow-btn-teal'
+          : 'bg-white text-navy-500 border-neutral-300 hover:border-teal-500 hover:text-teal-700',
         className
       )}
       aria-label={speaking ? 'Stop reading' : 'Read aloud'}

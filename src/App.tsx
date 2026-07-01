@@ -1,8 +1,29 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, createContext, useContext } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Home as HomeIcon, History, HelpCircle, Settings as SettingsIcon } from 'lucide-react'
+import { Home as HomeIcon, HelpCircle, Settings as SettingsIcon } from 'lucide-react'
 
-import { LangProvider, useLang } from './hooks/i18n'
+import { LangProvider, useLang, T } from './hooks/i18n'
+
+// ── Text size context ─────────────────────────────────────────
+// Steps 0–4 map to root font sizes: 13 14 16 18 20 px
+const TEXT_SIZE_PX = [13, 14, 16, 18, 20]
+const TextSizeContext = createContext<{ step: number; setStep: (v: number) => void }>({
+  step: 2,
+  setStep: () => {},
+})
+export const useTextSize = () => useContext(TextSizeContext)
+/** @deprecated use useTextSize */
+export const useLargeText = () => {
+  const { step, setStep } = useContext(TextSizeContext)
+  return { largeText: step > 2, setLargeText: (v: boolean) => setStep(v ? 3 : 2) }
+}
+
+// ── High contrast context ─────────────────────────────────────
+const HighContrastContext = createContext<{ highContrast: boolean; setHighContrast: (v: boolean) => void }>({
+  highContrast: false,
+  setHighContrast: () => {},
+})
+export const useHighContrast = () => useContext(HighContrastContext)
 
 import HomeScreen        from './screens/Home'
 import CameraScreen      from './screens/Camera'
@@ -12,18 +33,17 @@ import ResultsScreen     from './screens/Results'
 import DetailsScreen     from './screens/Details'
 import BillScreen        from './screens/BillScreen'
 import MedicationsScreen from './screens/MedicationsScreen'
-import HistoryScreen     from './screens/History'
 import HelpScreen        from './screens/Help'
 import SettingsScreen    from './screens/Settings'
 import ErrorScreen       from './screens/ErrorScreen'
 
 import type { Screen, SubsidyCard, ProcessDocumentResponse } from './types'
 
-const SHOW_NAV: Screen[] = ['home', 'history', 'help', 'settings']
+const SHOW_NAV: Screen[] = ['home', 'help', 'settings']
 
 const SCREEN_ORDER: Screen[] = [
   'home', 'camera', 'confirm', 'processing', 'results', 'bill', 'medications', 'details',
-  'history', 'help', 'settings', 'error',
+  'help', 'settings', 'error',
 ]
 
 const ease = [0.25, 0.1, 0.25, 1] as [number, number, number, number]
@@ -42,6 +62,7 @@ function AppInner() {
   const [apiResult, setApiResult]     = useState<ProcessDocumentResponse | null>(null)
   const [processingError, setProcessingError] = useState<string | null>(null)
   const { language } = useLang()
+  const t = T[language]
 
   const navigate = useCallback((next: Screen) => {
     setPrev(screen)
@@ -52,10 +73,9 @@ function AppInner() {
   const showNav = SHOW_NAV.includes(screen)
 
   const NAV_ITEMS = [
-    { id: 'home'     as Screen, label: language === 'zh' ? '主页' : language === 'ms' ? 'Utama' : language === 'ta' ? 'முகப்பு' : 'Home',     Icon: HomeIcon },
-    { id: 'history'  as Screen, label: language === 'zh' ? '历史' : language === 'ms' ? 'Sejarah' : language === 'ta' ? 'வரலாறு' : 'History', Icon: History },
-    { id: 'help'     as Screen, label: language === 'zh' ? '帮助' : language === 'ms' ? 'Bantuan' : language === 'ta' ? 'உதவி' : 'Help',     Icon: HelpCircle },
-    { id: 'settings' as Screen, label: language === 'zh' ? '设置' : language === 'ms' ? 'Tetapan' : language === 'ta' ? 'அமைப்பு' : 'Settings', Icon: SettingsIcon },
+    { id: 'home'     as Screen, label: t.nav_home,     Icon: HomeIcon },
+    { id: 'help'     as Screen, label: t.nav_help,     Icon: HelpCircle },
+    { id: 'settings' as Screen, label: t.nav_settings, Icon: SettingsIcon },
   ]
 
   const handleProcessingComplete = useCallback((data: ProcessDocumentResponse) => {
@@ -85,7 +105,6 @@ function AppInner() {
       case 'bill':        return <BillScreen onNavigate={navigate} bill={apiResult?.extracted.bill ?? null} institution={apiResult?.extracted.institution ?? null} visitDate={apiResult?.extracted.visitDate ?? null} />
       case 'medications': return <MedicationsScreen onNavigate={navigate} prescriptions={apiResult?.extracted.prescriptions ?? []} />
       case 'details':     return <DetailsScreen onNavigate={navigate} subsidy={selectedSubsidy} />
-      case 'history':     return <HistoryScreen onNavigate={navigate} />
       case 'help':        return <HelpScreen onNavigate={navigate} />
       case 'settings':    return <SettingsScreen onNavigate={navigate} />
       case 'error':       return <ErrorScreen onNavigate={navigate} errorType="processing" errorMessage={processingError} />
@@ -139,13 +158,13 @@ function AppInner() {
                     style={{ minHeight: 56 }}
                   >
                     <motion.div animate={{ scale: active ? 1.12 : 1 }} transition={{ type: 'spring', stiffness: 420, damping: 22 }}>
-                      <Icon className={`w-6 h-6 transition-colors ${active ? 'text-orange-500' : 'text-neutral-400'}`} strokeWidth={active ? 2.5 : 1.8} />
+                      <Icon className={`w-6 h-6 transition-colors ${active ? 'text-teal-700' : 'text-neutral-400'}`} strokeWidth={active ? 2.5 : 1.8} />
                     </motion.div>
-                    <span className={`text-xs font-semibold transition-colors ${active ? 'text-orange-500' : 'text-neutral-400'}`}>
+                    <span className={`text-xs font-semibold transition-colors ${active ? 'text-teal-700' : 'text-neutral-400'}`}>
                       {label}
                     </span>
                     {active && (
-                      <motion.div layoutId="tab-dot" className="absolute bottom-1 w-1 h-1 rounded-full bg-orange-500" transition={{ type: 'spring', stiffness: 420, damping: 30 }} />
+                      <motion.div layoutId="tab-dot" className="absolute bottom-1 w-1 h-1 rounded-full bg-teal-700" transition={{ type: 'spring', stiffness: 420, damping: 30 }} />
                     )}
                   </button>
                 )
@@ -159,9 +178,25 @@ function AppInner() {
 }
 
 export default function App() {
+  const [step, setStepState] = useState(2)
+  const setStep = (v: number) => {
+    setStepState(v)
+    document.documentElement.style.fontSize = TEXT_SIZE_PX[v] + 'px'
+  }
+
+  const [highContrast, setHighContrastState] = useState(false)
+  const setHighContrast = (v: boolean) => {
+    setHighContrastState(v)
+    document.documentElement.classList.toggle('high-contrast', v)
+  }
+
   return (
     <LangProvider>
-      <AppInner />
+      <TextSizeContext.Provider value={{ step, setStep }}>
+      <HighContrastContext.Provider value={{ highContrast, setHighContrast }}>
+        <AppInner />
+      </HighContrastContext.Provider>
+      </TextSizeContext.Provider>
     </LangProvider>
   )
 }

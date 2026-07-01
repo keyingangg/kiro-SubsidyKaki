@@ -11,7 +11,7 @@ import {
 
 import TTSButton from '../components/TTSButton'
 import { Badge, Button, Card, Divider, TopBar } from '../components/ui'
-import { useLang } from '../hooks/i18n'
+import { useLang, T } from '../hooks/i18n'
 import { useTTS } from '../hooks/useTTS'
 import type {
   ProcessDocumentResponse,
@@ -94,20 +94,20 @@ function formatMoney(currency: string, value: number | null) {
   }).format(value)
 }
 
-function EmptyResults({ onNavigate }: Pick<Props, 'onNavigate'>) {
+function EmptyResults({ onNavigate, t }: Pick<Props, 'onNavigate'> & { t: Record<string, string> }) {
   return (
     <div className="min-h-full bg-neutral-50 flex flex-col">
-      <TopBar title="Your Results" onBack={() => onNavigate('home')} />
+      <TopBar title={t.results_title} onBack={() => onNavigate('home')} />
       <div className="flex-1 grid place-items-center p-6 text-center">
         <div>
           <AlertTriangle className="w-12 h-12 text-orange-400 mx-auto mb-3" />
-          <p className="font-bold">No processed document</p>
+          <p className="font-bold">{t.no_processed}</p>
           <Button
             variant="primary"
             className="mt-4"
             onClick={() => onNavigate('home')}
           >
-            Go to Home
+            {t.go_home}
           </Button>
         </div>
       </div>
@@ -121,10 +121,11 @@ export default function Results({
   apiResult,
 }: Props) {
   const { language } = useLang()
+  const t = T[language]
   const { toggle, speaking } = useTTS(language)
 
   if (!apiResult) {
-    return <EmptyResults onNavigate={onNavigate} />
+    return <EmptyResults onNavigate={onNavigate} t={t} />
   }
 
   const { extracted, subsidies, message } = apiResult
@@ -149,32 +150,32 @@ export default function Results({
 
   const summaryItems = [
     {
-      label: 'Original bill',
+      label: t.original_bill,
       value: formatMoney(currency, billTotal),
       color: 'text-neutral-700',
     },
     {
-      label: 'Total saved',
+      label: t.total_saved,
       value: formatMoney(currency, savedAmount),
       color: 'text-success-500',
     },
     {
-      label: 'Before MediSave',
+      label: t.before_medisave,
       value: formatMoney(currency, payableAmount),
-      color: 'text-orange-500',
+      color: 'text-teal-700',
     },
   ]
 
   return (
     <div className="min-h-full bg-neutral-50 flex flex-col">
       <TopBar
-        title="Your Results"
+        title={t.results_title}
         subtitle={`${extracted.institution ?? 'Healthcare provider'} · ${visitDate}`}
         onBack={() => onNavigate('confirm')}
         right={
           <Badge variant="success" className="gap-1">
             <BadgeCheck className="w-3.5 h-3.5" />
-            Processed
+            {t.processed}
           </Badge>
         }
       />
@@ -197,15 +198,15 @@ export default function Results({
             </div>
 
             <p className="text-sm font-semibold text-neutral-500 uppercase tracking-wider mb-2">
-              You pay
+              {t.you_pay}
             </p>
-            <p className="text-[52px] font-bold text-orange-500 leading-none mb-2">
+            <p className="text-[52px] font-bold text-teal-700 leading-none mb-2">
               {formatMoney(currency, payableAmount)}
             </p>
             <p className="text-sm text-neutral-500 mb-4">
               {!hasAppliedSubsidy && billTotal !== null
-                ? 'No matching subsidies were applied'
-                : 'Final payable amount requires provider confirmation'}
+                ? t.no_matching
+                : t.requires_confirmation}
             </p>
 
             <Divider className="mb-4" />
@@ -229,18 +230,16 @@ export default function Results({
           <button
             onClick={() => extracted.bill && onNavigate('bill')}
             disabled={!extracted.bill}
-            className="bg-orange-50 border border-orange-200 rounded-2xl p-4 text-left hover:bg-orange-100 active:scale-[0.97] transition-all shadow-card disabled:opacity-55"
+            className="bg-teal-50 border border-teal-200 rounded-2xl p-4 text-left hover:bg-teal-100 active:scale-[0.97] transition-all shadow-card disabled:opacity-55"
           >
-            <div className="w-10 h-10 rounded-xl bg-orange-500 grid place-items-center mb-3">
+            <div className="w-10 h-10 rounded-xl bg-teal-700 grid place-items-center mb-3">
               <FileText className="w-5 h-5 text-white" />
             </div>
-            <p className="text-sm font-bold text-orange-700">
-              Bill Explained
+            <p className="text-sm font-bold text-teal-700">
+              {t.bill_title}
             </p>
-            <p className="text-xs text-orange-500 mt-0.5">
-              {extracted.bill
-                ? 'Every charge explained'
-                : 'No bill data detected'}
+            <p className="text-xs text-teal-500 mt-0.5">
+              {extracted.bill ? t.every_charge : t.no_bill_data}
             </p>
           </button>
 
@@ -255,25 +254,25 @@ export default function Results({
               <Pill className="w-5 h-5 text-white" />
             </div>
             <p className="text-sm font-bold text-teal-700">
-              Your Medications
+              {t.meds_title}
             </p>
             <p className="text-xs text-teal-500 mt-0.5">
               {extracted.prescriptions.length
-                ? 'Instructions & schedule'
-                : 'No medications detected'}
+                ? t.med_instructions
+                : t.no_medications}
             </p>
           </button>
         </motion.div>
 
         <motion.div variants={fadeUp}>
           <p className="text-xs font-bold text-neutral-400 uppercase tracking-widest mb-3">
-            Applied subsidies
+            {t.applied_subsidies}
           </p>
 
           <div className="flex flex-col gap-3">
             {subsidyCards.length === 0 ? (
               <Card className="p-5 text-center text-neutral-500">
-                No matching subsidy schemes were returned.
+                {t.no_subsidies_returned}
               </Card>
             ) : (
               subsidyCards.map((card) => (
@@ -299,19 +298,19 @@ export default function Results({
                       )}
                       <div className="flex items-center gap-2">
                         <Badge variant={badgeVariant(card.badgeColor)}>
-                          ✓ Matched
+                          {t.matched}
                         </Badge>
                         <span className="text-sm font-semibold text-success-500">
-                          Up to {card.saves}% coverage
+                          Up to {card.saves}% {t.coverage}
                         </span>
                       </div>
                     </div>
 
                     <div className="text-right">
-                      <p className="text-xl font-bold text-orange-500">
+                      <p className="text-xl font-bold text-teal-700">
                         {card.saves}%
                       </p>
-                      <p className="text-xs text-neutral-400">coverage</p>
+                      <p className="text-xs text-neutral-400">{t.coverage}</p>
                       <ChevronRight className="w-4 h-4 text-neutral-300 ml-auto mt-1" />
                     </div>
                   </div>
@@ -328,11 +327,10 @@ export default function Results({
           <span className="text-xl">💳</span>
           <div>
             <p className="text-sm font-bold text-teal-700">
-              Payable amount requires confirmation
+              {t.confirmation_title}
             </p>
             <p className="text-sm text-teal-600 mt-0.5">
-              Coverage percentages are estimates. Confirm actual subsidies and
-              MediSave usage with the healthcare provider.
+              {t.confirmation_body}
             </p>
           </div>
         </motion.div>
@@ -340,7 +338,7 @@ export default function Results({
         {message && (
           <motion.div
             variants={fadeUp}
-            className="bg-orange-50 border border-orange-200 rounded-2xl p-4 text-sm text-orange-700"
+            className="bg-teal-50 border border-teal-200 rounded-2xl p-4 text-sm text-teal-700"
           >
             {message}
           </motion.div>
@@ -355,7 +353,7 @@ export default function Results({
             className="gap-2"
           >
             <Printer className="w-5 h-5" />
-            Print Results
+            {t.print_results}
           </Button>
           <Button
             variant="secondary"
@@ -365,7 +363,7 @@ export default function Results({
             className="gap-2"
           >
             <Share2 className="w-5 h-5" />
-            Share with Doctor
+            {t.share_doctor}
           </Button>
         </motion.div>
       </motion.div>
