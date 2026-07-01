@@ -23,7 +23,6 @@ interface ResultsDisplayProps {
 export default function ResultsDisplay({
   subsidies,
   language,
-  extractedData,
 }: ResultsDisplayProps) {
   // Sort subsidies by estimatedCoveragePercent in descending order
   const sortedSubsidies = [...subsidies].sort(

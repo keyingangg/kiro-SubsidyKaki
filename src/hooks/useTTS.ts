@@ -10,12 +10,11 @@ const LANG_CODES: Record<Language, string> = {
 
 export function useTTS(language: Language = 'en') {
   const [speaking, setSpeaking]       = useState(false)
-  const [supported, setSupported]     = useState(false)
+  const [supported]                   = useState(() => typeof window !== 'undefined' && 'speechSynthesis' in window)
   const [rate, setRate]               = useState(0.85)   // slower default for elderly
   const utteranceRef                  = useRef<SpeechSynthesisUtterance | null>(null)
 
   useEffect(() => {
-    setSupported(typeof window !== 'undefined' && 'speechSynthesis' in window)
     return () => { window.speechSynthesis?.cancel() }
   }, [])
 

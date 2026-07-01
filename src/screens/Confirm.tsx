@@ -1,12 +1,13 @@
-import { useState, useRef } from 'react'
+import { useEffect, useState, useRef } from 'react'
+import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
 import { FileText, ShieldCheck, RefreshCw, ChevronRight, CheckSquare, Square, Tag, Check } from 'lucide-react'
-import { Button, Card, Badge, TopBar } from '../components/ui'
+import { Button, Card, TopBar } from '../components/ui'
 import type { Screen } from '../types'
 
-interface Props { onNavigate: (s: Screen) => void; file: File | null }
+interface Props { onNavigate: (s: Screen) => void; file: File | null; onFileReady: (file: File) => void }
 
-// Simulated auto-detection of document type
+// User-selectable document categories for context in the review step.
 const DOC_TYPES = [
   { id: 'invoice',     label: 'Polyclinic Invoice',    icon: '🧾', badge: 'orange' as const,  timing: 'After visit', timingColor: 'text-orange-500' },
   { id: 'referral',    label: 'Referral Letter',       icon: '📋', badge: 'teal' as const,    timing: 'Before visit ★', timingColor: 'text-teal-600' },
@@ -16,16 +17,8 @@ const DOC_TYPES = [
   { id: 'specialist',  label: 'Specialist Memo',       icon: '📝', badge: 'gray' as const,    timing: 'During care',    timingColor: 'text-neutral-500' },
 ]
 
-export default function Confirm({ onNavigate, file }: Props) {
-  const [checked1, setChecked1]   = useState(false)
-  const [checked2, setChecked2]   = useState(false)
-  const [docType, setDocType]     = useState(DOC_TYPES[0])
-  const [showPicker, setShowPicker] = useState(false)
-  const [previewUrl]              = useState(() => file ? URL.createObjectURL(file) : null)
-  const fileInput                 = useRef<HTMLInputElement>(null)
-  const bothChecked               = checked1 && checked2
-
-  const Checkbox = ({ checked, onToggle, label }: { checked: boolean; onToggle: () => void; label: string }) => (
+function ConsentCheckbox({ checked, onToggle, label }: { checked: boolean; onToggle: () => void; label: string }) {
+  return (
     <button className="flex items-start gap-3 text-left w-full py-1" onClick={onToggle} aria-pressed={checked}>
       <div className={`w-6 h-6 rounded flex items-center justify-center flex-shrink-0 mt-0.5 transition-colors ${checked ? 'text-orange-500' : 'text-neutral-400'}`}>
         {checked ? <CheckSquare className="w-6 h-6" /> : <Square className="w-6 h-6" />}
@@ -33,10 +26,24 @@ export default function Confirm({ onNavigate, file }: Props) {
       <span className="text-base text-neutral-700 leading-snug">{label}</span>
     </button>
   )
+}
+
+export default function Confirm({ onNavigate, file, onFileReady }: Props) {
+  const [checked1, setChecked1]   = useState(false)
+  const [checked2, setChecked2]   = useState(false)
+  const [docType, setDocType]     = useState(DOC_TYPES[0])
+  const [showPicker, setShowPicker] = useState(false)
+  const [previewUrl, setPreviewUrl] = useState<string | null>(() => file && file.type !== 'application/pdf' ? URL.createObjectURL(file) : null)
+  const fileInput                 = useRef<HTMLInputElement>(null)
+  const bothChecked               = checked1 && checked2
+
+  useEffect(() => {
+    return () => { if (previewUrl) URL.revokeObjectURL(previewUrl) }
+  }, [previewUrl])
 
   return (
     <div className="min-h-full bg-neutral-50 flex flex-col">
-      <TopBar title="Review Document" subtitle="Confirm before processing" onBack={() => onNavigate('camera')} />
+      <TopBar title="Review Document" subtitle="Confirm before processing" onBack={() => onNavigate('home')} />
 
       <div className="flex-1 overflow-y-auto px-5 py-5 flex flex-col gap-4">
 
@@ -44,7 +51,7 @@ export default function Confirm({ onNavigate, file }: Props) {
         <Card className="overflow-hidden">
           <div className="relative bg-neutral-100 rounded-xl overflow-hidden" style={{ aspectRatio: '3/4', maxHeight: 260 }}>
             {previewUrl ? (
-              <img src={previewUrl} alt="Document preview" className="w-full h-full object-cover" />
+              <Image src={previewUrl} alt="Document preview" fill sizes="(max-width: 672px) 100vw, 672px" unoptimized className="object-cover" />
             ) : (
               <div className="w-full h-full flex flex-col items-center justify-center gap-3">
                 <div className="w-16 h-16 rounded-2xl bg-neutral-200 flex items-center justify-center">
@@ -70,9 +77,9 @@ export default function Confirm({ onNavigate, file }: Props) {
           </div>
         </Card>
 
-        {/* Auto-detected document type — tappable to change */}
+        {/* User-selected document category */}
         <div>
-          <p className="text-xs font-bold text-neutral-400 uppercase tracking-widest mb-2">Detected document type</p>
+          <p className="text-xs font-bold text-neutral-400 uppercase tracking-widest mb-2">Document category</p>
           <button
             onClick={() => setShowPicker(v => !v)}
             className="w-full bg-white border border-neutral-200 rounded-xl p-4 flex items-center gap-3 shadow-card hover:bg-neutral-50 active:scale-[0.98] transition-all"
@@ -151,18 +158,18 @@ export default function Confirm({ onNavigate, file }: Props) {
           <ShieldCheck className="w-5 h-5 text-teal-500 flex-shrink-0 mt-0.5" />
           <div>
             <p className="text-sm font-semibold text-teal-700 mb-1">Your privacy is protected</p>
-            <p className="text-sm text-teal-600 leading-relaxed">NRIC, name, and date of birth are automatically removed before any analysis is performed.</p>
+            <p className="text-sm text-teal-600 leading-relaxed">NRIC-like identifiers are redacted from extracted results. This app does not save your uploaded file.</p>
           </div>
         </div>
 
         {/* Required checkboxes */}
         <Card className="p-4 flex flex-col gap-4">
           <p className="text-sm font-bold text-neutral-900">Please confirm before continuing:</p>
-          <Checkbox checked={checked1} onToggle={() => setChecked1(v => !v)}
+          <ConsentCheckbox checked={checked1} onToggle={() => setChecked1(v => !v)}
             label="I consent to this document being processed to check my subsidy eligibility." />
           <div className="h-px bg-neutral-100" />
-          <Checkbox checked={checked2} onToggle={() => setChecked2(v => !v)}
-            label="I understand my personal details will be automatically removed and not stored." />
+          <ConsentCheckbox checked={checked2} onToggle={() => setChecked2(v => !v)}
+            label="I understand the file is sent for processing and is not saved by this app." />
         </Card>
 
         <AnimatePresence>
@@ -180,8 +187,17 @@ export default function Confirm({ onNavigate, file }: Props) {
         )}
       </div>
 
-      <input ref={fileInput} type="file" accept="image/*,.pdf" className="hidden"
-        onChange={e => { if (e.target.files?.[0]) onNavigate('confirm') }} />
+      <input ref={fileInput} type="file" accept="image/jpeg,image/png,image/webp,image/heic,application/pdf" className="hidden"
+        onChange={e => {
+          const nextFile = e.target.files?.[0]
+          if (nextFile) {
+            onFileReady(nextFile)
+            setPreviewUrl(nextFile.type === 'application/pdf' ? null : URL.createObjectURL(nextFile))
+            setChecked1(false)
+            setChecked2(false)
+          }
+          e.target.value = ''
+        }} />
     </div>
   )
 }

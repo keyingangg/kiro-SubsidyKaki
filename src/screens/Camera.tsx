@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react'
 import { motion } from 'framer-motion'
-import { X, Camera, Zap } from 'lucide-react'
+import { X, Camera } from 'lucide-react'
 import type { Screen } from '../types'
 
 interface Props { onNavigate: (s: Screen) => void; onFileReady: (f: File) => void }
@@ -32,9 +32,7 @@ export default function CameraScreen({ onNavigate, onFileReady }: Props) {
           <X className="w-5 h-5" />
         </button>
         <span className="text-white font-semibold text-base">Scan Document</span>
-        <button className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white" aria-label="Flash toggle">
-          <Zap className="w-5 h-5" />
-        </button>
+        <div className="w-10 h-10" />
       </div>
 
       {/* Viewfinder */}

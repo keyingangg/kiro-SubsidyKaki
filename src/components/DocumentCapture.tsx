@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
+import Image from "next/image";
 import { Camera, Upload, Check, X, FileText, AlertCircle } from "lucide-react";
 import { validateFile, validatePdfPageCount } from "@/lib/file-validator";
 import { cn } from "@/lib/utils";
@@ -32,6 +33,10 @@ export default function DocumentCapture({
 
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => () => {
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+  }, [previewUrl]);
 
   // Cleanup preview URL to prevent memory leaks
   const cleanupPreview = useCallback(() => {
@@ -226,9 +231,12 @@ export default function DocumentCapture({
           <div className="w-full rounded-xl overflow-hidden border-2 border-neutral-200 bg-neutral-50">
             {previewUrl ? (
               // Image preview
-              <img
+              <Image
                 src={previewUrl}
                 alt="Document preview"
+                width={800}
+                height={1000}
+                unoptimized
                 className="w-full max-h-[400px] object-contain"
               />
             ) : (

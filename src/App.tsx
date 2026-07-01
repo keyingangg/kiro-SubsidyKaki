@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Home as HomeIcon, History, HelpCircle, Settings as SettingsIcon } from 'lucide-react'
 
-import { LangProvider, useLang, T } from './hooks/i18n'
+import { LangProvider, useLang } from './hooks/i18n'
 
 import HomeScreen        from './screens/Home'
 import CameraScreen      from './screens/Camera'
@@ -17,13 +17,13 @@ import HelpScreen        from './screens/Help'
 import SettingsScreen    from './screens/Settings'
 import ErrorScreen       from './screens/ErrorScreen'
 
-import type { Screen, SubsidyCard } from './types'
+import type { Screen, SubsidyCard, ProcessDocumentResponse } from './types'
 
 const SHOW_NAV: Screen[] = ['home', 'history', 'help', 'settings']
 
 const SCREEN_ORDER: Screen[] = [
-  'home', 'camera', 'confirm', 'processing', 'results', 'bill', 'medications',
-  'details', 'history', 'help', 'settings', 'error',
+  'home', 'camera', 'confirm', 'processing', 'results', 'bill', 'medications', 'details',
+  'history', 'help', 'settings', 'error',
 ]
 
 const ease = [0.25, 0.1, 0.25, 1] as [number, number, number, number]
@@ -39,6 +39,8 @@ function AppInner() {
   const [prevScreen, setPrev]         = useState<Screen>('home')
   const [file, setFile]               = useState<File | null>(null)
   const [selectedSubsidy, setSubsidy] = useState<SubsidyCard | null>(null)
+  const [apiResult, setApiResult]     = useState<ProcessDocumentResponse | null>(null)
+  const [processingError, setProcessingError] = useState<string | null>(null)
   const { language } = useLang()
 
   const navigate = useCallback((next: Screen) => {
@@ -56,21 +58,38 @@ function AppInner() {
     { id: 'settings' as Screen, label: language === 'zh' ? '设置' : language === 'ms' ? 'Tetapan' : language === 'ta' ? 'அமைப்பு' : 'Settings', Icon: SettingsIcon },
   ]
 
+  const handleProcessingComplete = useCallback((data: ProcessDocumentResponse) => {
+    setApiResult(data)
+    navigate('results')
+  }, [navigate])
+
+  const handleProcessingError = useCallback((message: string) => {
+    setProcessingError(message)
+    navigate('error')
+  }, [navigate])
+
+  const handleFileReady = useCallback((nextFile: File) => {
+    setFile(nextFile)
+    setApiResult(null)
+    setProcessingError(null)
+    setSubsidy(null)
+  }, [])
+
   const renderScreen = () => {
     switch (screen) {
-      case 'home':        return <HomeScreen onNavigate={navigate} />
-      case 'camera':      return <CameraScreen onNavigate={navigate} onFileReady={setFile} />
-      case 'confirm':     return <ConfirmScreen onNavigate={navigate} file={file} />
-      case 'processing':  return <ProcessingScreen onNavigate={navigate} />
-      case 'results':     return <ResultsScreen onNavigate={navigate} onSelectSubsidy={setSubsidy} />
-      case 'bill':        return <BillScreen onNavigate={navigate} />
-      case 'medications': return <MedicationsScreen onNavigate={navigate} />
+      case 'home':        return <HomeScreen onNavigate={navigate} onFileReady={handleFileReady} />
+      case 'camera':      return <CameraScreen onNavigate={navigate} onFileReady={handleFileReady} />
+      case 'confirm':     return <ConfirmScreen onNavigate={navigate} file={file} onFileReady={handleFileReady} />
+      case 'processing':  return <ProcessingScreen file={file} onComplete={handleProcessingComplete} onError={handleProcessingError} />
+      case 'results':     return <ResultsScreen onNavigate={navigate} onSelectSubsidy={setSubsidy} apiResult={apiResult} />
+      case 'bill':        return <BillScreen onNavigate={navigate} bill={apiResult?.extracted.bill ?? null} institution={apiResult?.extracted.institution ?? null} visitDate={apiResult?.extracted.visitDate ?? null} />
+      case 'medications': return <MedicationsScreen onNavigate={navigate} prescriptions={apiResult?.extracted.prescriptions ?? []} />
       case 'details':     return <DetailsScreen onNavigate={navigate} subsidy={selectedSubsidy} />
       case 'history':     return <HistoryScreen onNavigate={navigate} />
       case 'help':        return <HelpScreen onNavigate={navigate} />
       case 'settings':    return <SettingsScreen onNavigate={navigate} />
-      case 'error':       return <ErrorScreen onNavigate={navigate} errorType="upload" />
-      default:            return <HomeScreen onNavigate={navigate} />
+      case 'error':       return <ErrorScreen onNavigate={navigate} errorType="processing" errorMessage={processingError} />
+      default:            return <HomeScreen onNavigate={navigate} onFileReady={handleFileReady} />
     }
   }
 

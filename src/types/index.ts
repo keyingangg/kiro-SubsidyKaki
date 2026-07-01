@@ -62,12 +62,32 @@ export interface SubsidyScheme {
 
 // --- Document Extraction Types ---
 
+export interface ExtractedPrescription {
+  medicationName: string;
+  dosage: string | null;
+  frequency: string | null;
+  instructions: string | null;
+}
+
+export interface ExtractedBillItem {
+  description: string;
+  amount: number | null;
+}
+
+export interface ExtractedBill {
+  currency: string;
+  totalAmount: number | null;
+  items: ExtractedBillItem[];
+}
+
 export interface RawExtractedData {
   medicalCodes: string[];
   diagnoses: string[];
   visitDate: string | null;
   institution: string | null;
   rawText: string;
+  prescriptions: ExtractedPrescription[];
+  bill: ExtractedBill | null;
 }
 
 export interface RedactedExtractedData {
@@ -76,6 +96,8 @@ export interface RedactedExtractedData {
   visitDate: string | null;
   institution: string | null;
   rawText: string; // All NRIC patterns replaced with [REDACTED]
+  prescriptions: ExtractedPrescription[];
+  bill: ExtractedBill | null;
 }
 
 export type ExtractedDocumentData = RedactedExtractedData;

@@ -140,12 +140,27 @@ export function redactExtractedData(data: RawExtractedData): RedactedExtractedDa
       return result.redactedText;
     });
 
+    const redactedPrescriptions = data.prescriptions.map((prescription) => ({
+      medicationName: redactNric(prescription.medicationName).redactedText,
+      dosage: prescription.dosage === null ? null : redactNric(prescription.dosage).redactedText,
+      frequency: prescription.frequency === null ? null : redactNric(prescription.frequency).redactedText,
+      instructions: prescription.instructions === null ? null : redactNric(prescription.instructions).redactedText,
+    }));
+
+    const redactedBill = data.bill === null ? null : {
+      ...data.bill,
+      currency: redactNric(data.bill.currency).redactedText,
+      items: data.bill.items.map((item) => ({ ...item, description: redactNric(item.description).redactedText })),
+    };
+
     return {
       rawText: rawTextResult.redactedText,
       institution: redactedInstitution,
       visitDate: redactedVisitDate,
       diagnoses: redactedDiagnoses,
       medicalCodes: redactedMedicalCodes,
+      prescriptions: redactedPrescriptions,
+      bill: redactedBill,
     };
   } catch (error) {
     // Re-throw NricRedactionError as-is

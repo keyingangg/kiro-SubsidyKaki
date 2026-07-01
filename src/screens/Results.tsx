@@ -1,201 +1,53 @@
 import { motion } from 'framer-motion'
-import { Share2, Printer, MessageCircle, ChevronRight, BadgeCheck, FileText, Pill } from 'lucide-react'
-import { Button, Card, Badge, TopBar, Divider } from '../components/ui'
+import { AlertTriangle, BadgeCheck, ChevronRight, FileText, Pill, Printer, Share2 } from 'lucide-react'
+import { Badge, Button, Card, Divider, TopBar } from '../components/ui'
 import TTSButton from '../components/TTSButton'
-import { MOCK_RESULT } from '../lib/utils'
-import { useTTS, buildResultsSummary } from '../hooks/useTTS'
-import { useLang, T } from '../hooks/i18n'
-import type { Screen, SubsidyCard } from '../types'
+import { useLang } from '../hooks/i18n'
+import { useTTS } from '../hooks/useTTS'
+import type { ProcessDocumentResponse, Screen, SubsidyCard, SubsidyResult } from '../types'
 
-interface Props {
-  onNavigate: (s: Screen) => void
-  onSelectSubsidy: (s: SubsidyCard) => void
+interface Props { onNavigate: (screen: Screen) => void; onSelectSubsidy: (subsidy: SubsidyCard) => void; apiResult?: ProcessDocumentResponse | null }
+const stagger = { hidden: {}, show: { transition: { staggerChildren: 0.08, delayChildren: 0.1 } } }
+const fadeUp = { hidden: { opacity: 0, y: 18 }, show: { opacity: 1, y: 0, transition: { duration: 0.4 } } }
+
+function presentation(result: SubsidyResult, index: number): SubsidyCard {
+  const name = result.schemeName.toLowerCase()
+  const styles = [['pioneer', '🎖️', 'orange'], ['merdeka', '🏅', 'gray'], ['chas', '🏷️', 'navy'], ['medisave', '💳', 'teal'], ['cdmp', '🏥', 'teal'], ['medishield', '🛡️', 'teal'], ['medifund', '💰', 'orange']] as const
+  const match = styles.find(([key]) => name.includes(key))
+  return { id: `subsidy-${index}`, name: result.schemeName, chineseName: result.translations?.['cmn-Hans-CN']?.schemeName ?? '', eligible: result.estimatedCoveragePercent > 0, saves: result.estimatedCoveragePercent, outOfPocket: Math.max(0, 100 - result.estimatedCoveragePercent), icon: match?.[1] ?? '📋', badgeColor: match?.[2] ?? 'teal', description: result.coverageDescription, benefits: result.eligibilityConditions.split(/[.;]\s*/).filter(Boolean), howToUse: result.coverageDescription }
 }
 
-const badgeVariant = (c: SubsidyCard['badgeColor']) =>
-  c === 'orange' ? 'orange' as const : c === 'teal' ? 'teal' as const : c === 'navy' ? 'navy' as const : 'gray' as const
+const badgeVariant = (color: SubsidyCard['badgeColor']) => color === 'orange' ? 'orange' as const : color === 'navy' ? 'navy' as const : color === 'gray' ? 'gray' as const : 'teal' as const
+function formatMoney(currency: string, value: number | null) {
+  if (value === null) return '—'
+  const code = /^[A-Z]{3}$/.test(currency.toUpperCase()) ? currency.toUpperCase() : 'SGD'
+  return new Intl.NumberFormat('en-SG', { style: 'currency', currency: code, maximumFractionDigits: 2 }).format(value)
+}
 
-const stagger = { hidden: {}, show: { transition: { staggerChildren: 0.08, delayChildren: 0.1 } } }
-const fadeUp  = { hidden: { opacity: 0, y: 18 }, show: { opacity: 1, y: 0, transition: { duration: 0.4 } } }
-
-export default function Results({ onNavigate, onSelectSubsidy }: Props) {
-  const r = MOCK_RESULT
+export default function Results({ onNavigate, onSelectSubsidy, apiResult }: Props) {
   const { language } = useLang()
   const { toggle, speaking } = useTTS(language)
+  if (!apiResult) return <div className="min-h-full bg-neutral-50 flex flex-col"><TopBar title="Your Results" onBack={() => onNavigate('home')} /><div className="flex-1 grid place-items-center p-6 text-center"><div><AlertTriangle className="w-12 h-12 text-orange-400 mx-auto mb-3" /><p className="font-bold">No processed document</p><Button variant="primary" className="mt-4" onClick={() => onNavigate('home')}>Go to Home</Button></div></div></div>
 
-  const summary = buildResultsSummary(
-    language,
-    r.outOfPocket,
-    r.finalCost,
-    r.totalSaved,
-    r.clinicName,
-    r.subsidies.filter(s => s.eligible).map(s => s.name)
-  )
+  const { extracted, subsidies, message } = apiResult
+  const cards = subsidies.map(presentation)
+  const date = extracted.visitDate ? new Intl.DateTimeFormat('en-SG', { dateStyle: 'medium' }).format(new Date(`${extracted.visitDate}T00:00:00`)) : 'Date not identified'
+  const billTotal = extracted.bill?.totalAmount ?? null
+  const currency = extracted.bill?.currency ?? 'SGD'
+  const hasAppliedSubsidy = cards.some(card => card.eligible)
+  const payableAmount = !hasAppliedSubsidy ? billTotal : null
+  const savedAmount = !hasAppliedSubsidy && billTotal !== null ? 0 : null
+  const spokenText = `Document results for ${extracted.institution ?? 'healthcare provider'}. ${cards.length} subsidy matches and ${extracted.prescriptions.length} medications were extracted.`
 
-  return (
-    <div className="min-h-full bg-neutral-50 flex flex-col">
-      <TopBar
-        title={T[language].results_title}
-        subtitle={`${r.clinicName} · ${r.date}`}
-        onBack={() => onNavigate('confirm')}
-        right={
-          <Badge variant="success" className="gap-1.5">
-            <BadgeCheck className="w-3.5 h-3.5" />
-            {r.confidence}% match
-          </Badge>
-        }
-      />
-
-      <motion.div className="flex-1 overflow-y-auto px-5 py-5 flex flex-col gap-4"
-        variants={stagger} initial="hidden" animate="show">
-
-        {/* Hero cost card with TTS */}
-        <motion.div variants={fadeUp}>
-          <Card className="p-5 text-center bg-gradient-to-b from-navy-50 to-white border-navy-100">
-            {/* TTS button top right of card */}
-            <div className="flex justify-end mb-2">
-              <TTSButton text={summary} speaking={speaking} onToggle={toggle} size="sm" />
-            </div>
-
-            <p className="text-sm font-semibold text-neutral-500 uppercase tracking-wider mb-2">
-              {T[language].you_pay}
-            </p>
-            <motion.p
-              className="text-[52px] font-bold text-orange-500 leading-none mb-1"
-              initial={{ scale: 0.6, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ delay: 0.2, type: 'spring', stiffness: 180, damping: 16 }}
-            >
-              ${r.finalCost}
-            </motion.p>
-            <p className="text-base text-neutral-500 mb-4">
-              {language === 'zh' ? '使用保健储蓄后' : language === 'ms' ? 'Selepas MediSave' : language === 'ta' ? 'மெடிசேவ் பிறகு' : 'After MediSave'}
-              {' '}(
-              {language === 'zh' ? `余额: $${r.mediSaveBalance.toLocaleString()}` : `balance: $${r.mediSaveBalance.toLocaleString()}`}
-              )
-            </p>
-            <Divider className="mb-4" />
-            <div className="grid grid-cols-3 gap-1 text-center">
-              {[
-                { label: T[language].original_bill, val: `$${r.totalBill}`,  color: 'text-neutral-700' },
-                { label: T[language].total_saved,   val: `$${r.totalSaved}`, color: 'text-success-500' },
-                { label: language === 'zh' ? '使用保健储蓄前' : language === 'ms' ? 'Sebelum MediSave' : language === 'ta' ? 'மெடிசேவ் முன்' : 'Before MediSave',
-                  val: `$${r.outOfPocket}`, color: 'text-orange-500' },
-              ].map(d => (
-                <div key={d.label}>
-                  <p className={`text-xl font-bold ${d.color}`}>{d.val}</p>
-                  <p className="text-xs text-neutral-400 mt-0.5 leading-tight">{d.label}</p>
-                </div>
-              ))}
-            </div>
-          </Card>
-        </motion.div>
-
-        {/* Quick-access cards: Bill Explained + Medications */}
-        <motion.div variants={fadeUp} className="grid grid-cols-2 gap-3">
-          <button
-            onClick={() => onNavigate('bill')}
-            className="bg-orange-50 border border-orange-200 rounded-2xl p-4 text-left hover:bg-orange-100 active:scale-[0.97] transition-all shadow-card"
-          >
-            <div className="w-10 h-10 rounded-xl bg-orange-500 flex items-center justify-center mb-3">
-              <FileText className="w-5 h-5 text-white" />
-            </div>
-            <p className="text-sm font-bold text-orange-700">
-              {T[language].bill_title}
-            </p>
-            <p className="text-xs text-orange-500 mt-0.5">
-              {language === 'zh' ? '每项费用说明' : language === 'ms' ? 'Setiap item dijelaskan' : language === 'ta' ? 'ஒவ்வொரு கட்டணமும் விளக்கம்' : 'Every charge explained'}
-            </p>
-          </button>
-
-          <button
-            onClick={() => onNavigate('medications')}
-            className="bg-teal-50 border border-teal-200 rounded-2xl p-4 text-left hover:bg-teal-100 active:scale-[0.97] transition-all shadow-card"
-          >
-            <div className="w-10 h-10 rounded-xl bg-teal-500 flex items-center justify-center mb-3">
-              <Pill className="w-5 h-5 text-white" />
-            </div>
-            <p className="text-sm font-bold text-teal-700">
-              {T[language].meds_title}
-            </p>
-            <p className="text-xs text-teal-500 mt-0.5">
-              {language === 'zh' ? '服药说明和时间表' : language === 'ms' ? 'Arahan & jadual ubat' : language === 'ta' ? 'மருந்து வழிமுறைகள்' : 'Instructions & schedule'}
-            </p>
-          </button>
-        </motion.div>
-
-        {/* Subsidy cards */}
-        <motion.div variants={fadeUp}>
-          <p className="text-xs font-bold text-neutral-400 uppercase tracking-widest mb-3">
-            {language === 'zh' ? '适用津贴' : language === 'ms' ? 'Subsidi yang layak' : language === 'ta' ? 'பொருந்தும் மானியங்கள்' : 'Applied subsidies'}
-          </p>
-          <div className="flex flex-col gap-3">
-            {r.subsidies.map((s) => (
-              <Card
-                key={s.id}
-                className={`p-4 ${!s.eligible ? 'opacity-60' : ''}`}
-                onClick={() => { if (s.eligible) { onSelectSubsidy(s); onNavigate('details') } }}
-              >
-                <div className="flex items-start gap-3">
-                  <span className="text-2xl flex-shrink-0 mt-0.5">{s.icon}</span>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-base font-bold text-neutral-900 leading-snug">{s.name}</p>
-                    <p className="text-sm text-neutral-400 mb-2">{s.chineseName}</p>
-                    {s.eligible
-                      ? <div className="flex items-center gap-2"><Badge variant={badgeVariant(s.badgeColor)}>✓ {language === 'zh' ? '符合资格' : language === 'ms' ? 'Layak' : language === 'ta' ? 'தகுதியுடையவர்' : 'Eligible'}</Badge><span className="text-sm font-semibold text-success-500">-${s.saves}</span></div>
-                      : <Badge variant="gray">✗ {language === 'zh' ? '不适用' : language === 'ms' ? 'Tidak layak' : language === 'ta' ? 'பொருந்தாது' : 'Not applicable'}</Badge>
-                    }
-                  </div>
-                  {s.eligible && (
-                    <div className="text-right flex-shrink-0">
-                      <p className="text-xl font-bold text-orange-500">${s.outOfPocket}</p>
-                      <p className="text-xs text-neutral-400">{T[language].you_pay}</p>
-                      <ChevronRight className="w-4 h-4 text-neutral-300 ml-auto mt-1" />
-                    </div>
-                  )}
-                </div>
-              </Card>
-            ))}
-          </div>
-        </motion.div>
-
-        {/* MediSave callout */}
-        {r.canUseMediSave && (
-          <motion.div variants={fadeUp} className="bg-teal-50 border border-teal-200 rounded-2xl p-4 flex gap-3">
-            <span className="text-2xl">💳</span>
-            <div className="flex-1">
-              <p className="text-sm font-bold text-teal-700">
-                {language === 'zh' ? '保健储蓄支付余额' : language === 'ms' ? 'MediSave menutup baki' : language === 'ta' ? 'மெடிசேவ் மீதியை செலுத்துகிறது' : 'MediSave covers the rest'}
-              </p>
-              <p className="text-sm text-teal-600 mt-0.5">
-                {language === 'zh'
-                  ? `您的剩余$${r.outOfPocket}可从保健储蓄余额$${r.mediSaveBalance.toLocaleString()}中支付。实际自付金额：$0。`
-                  : language === 'ms'
-                  ? `Baki $${r.outOfPocket} anda boleh dibayar dari MediSave $${r.mediSaveBalance.toLocaleString()}. Kos sebenar: $0.`
-                  : language === 'ta'
-                  ? `உங்கள் மீதி $${r.outOfPocket} மெடிசேவ் $${r.mediSaveBalance.toLocaleString()} இலிருந்து செலுத்தலாம். இறுதி செலவு: $0.`
-                  : `Your remaining $${r.outOfPocket} can be paid from MediSave balance of $${r.mediSaveBalance.toLocaleString()}. Final out-of-pocket: $0.`}
-              </p>
-            </div>
-          </motion.div>
-        )}
-
-        {/* Actions */}
-        <motion.div variants={fadeUp} className="flex flex-col gap-3 pt-1">
-          <Button variant="secondary" size="md" fullWidth onClick={() => alert('Opens print dialog')} className="gap-2">
-            <Printer className="w-5 h-5 text-neutral-500" />
-            {language === 'zh' ? '打印结果' : language === 'ms' ? 'Cetak Keputusan' : language === 'ta' ? 'முடிவுகளை அச்சிடுங்கள்' : 'Print Results'}
-          </Button>
-          <Button variant="secondary" size="md" fullWidth onClick={() => alert('Opens share sheet')} className="gap-2">
-            <Share2 className="w-5 h-5 text-neutral-500" />
-            {language === 'zh' ? '与医生分享' : language === 'ms' ? 'Kongsi dengan Doktor' : language === 'ta' ? 'மருத்துவருடன் பகிரவும்' : 'Share with Doctor'}
-          </Button>
-          <Button variant="ghost" size="md" fullWidth onClick={() => onNavigate('help')} className="gap-2">
-            <MessageCircle className="w-5 h-5" />
-            {language === 'zh' ? '提问' : language === 'ms' ? 'Tanya Soalan' : language === 'ta' ? 'கேள்விகள் கேளுங்கள்' : 'Ask Questions'}
-          </Button>
-        </motion.div>
-      </motion.div>
-    </div>
-  )
+  return <div className="min-h-full bg-neutral-50 flex flex-col">
+    <TopBar title="Your Results" subtitle={`${extracted.institution ?? 'Healthcare provider'} · ${date}`} onBack={() => onNavigate('confirm')} right={<Badge variant="success" className="gap-1"><BadgeCheck className="w-3.5 h-3.5" />Processed</Badge>} />
+    <motion.div className="flex-1 overflow-y-auto px-5 py-5 flex flex-col gap-4" variants={stagger} initial="hidden" animate="show">
+      <motion.div variants={fadeUp}><Card className="p-5 text-center bg-gradient-to-b from-navy-50 to-white border-navy-100"><div className="flex justify-end mb-2"><TTSButton text={spokenText} speaking={speaking} onToggle={toggle} size="sm" /></div><p className="text-sm font-semibold text-neutral-500 uppercase tracking-wider mb-2">You pay</p><p className="text-[52px] font-bold text-orange-500 leading-none mb-2">{formatMoney(currency, payableAmount)}</p><p className="text-sm text-neutral-500 mb-4">{!hasAppliedSubsidy && billTotal !== null ? 'No matching subsidies were applied' : 'Final payable amount requires provider confirmation'}</p><Divider className="mb-4" /><div className="grid grid-cols-3 gap-1 text-center">{[{ label: 'Original bill', value: formatMoney(currency, billTotal), color: 'text-neutral-700' }, { label: 'Total saved', value: formatMoney(currency, savedAmount), color: 'text-success-500' }, { label: 'Before MediSave', value: formatMoney(currency, payableAmount), color: 'text-orange-500' }].map(item => <div key={item.label}><p className={`text-xl font-bold ${item.color}`}>{item.value}</p><p className="text-xs text-neutral-400 mt-0.5">{item.label}</p></div>)}</div></Card></motion.div>
+      <motion.div variants={fadeUp} className="grid grid-cols-2 gap-3"><button onClick={() => extracted.bill && onNavigate('bill')} disabled={!extracted.bill} className="bg-orange-50 border border-orange-200 rounded-2xl p-4 text-left hover:bg-orange-100 active:scale-[0.97] transition-all shadow-card disabled:opacity-55"><div className="w-10 h-10 rounded-xl bg-orange-500 grid place-items-center mb-3"><FileText className="w-5 h-5 text-white" /></div><p className="text-sm font-bold text-orange-700">Bill Explained</p><p className="text-xs text-orange-500 mt-0.5">{extracted.bill ? 'Every charge explained' : 'No bill data detected'}</p></button><button onClick={() => extracted.prescriptions.length && onNavigate('medications')} disabled={!extracted.prescriptions.length} className="bg-teal-50 border border-teal-200 rounded-2xl p-4 text-left hover:bg-teal-100 active:scale-[0.97] transition-all shadow-card disabled:opacity-55"><div className="w-10 h-10 rounded-xl bg-teal-500 grid place-items-center mb-3"><Pill className="w-5 h-5 text-white" /></div><p className="text-sm font-bold text-teal-700">Your Medications</p><p className="text-xs text-teal-500 mt-0.5">{extracted.prescriptions.length ? 'Instructions & schedule' : 'No medications detected'}</p></button></motion.div>
+      <motion.div variants={fadeUp}><p className="text-xs font-bold text-neutral-400 uppercase tracking-widest mb-3">Applied subsidies</p><div className="flex flex-col gap-3">{cards.length === 0 ? <Card className="p-5 text-center text-neutral-500">No matching subsidy schemes were returned.</Card> : cards.map(card => <Card key={card.id} className="p-4" onClick={() => { onSelectSubsidy(card); onNavigate('details') }}><div className="flex items-start gap-3"><span className="text-2xl">{card.icon}</span><div className="flex-1 min-w-0"><p className="text-base font-bold text-neutral-900">{card.name}</p>{card.chineseName && <p className="text-sm text-neutral-400 mb-2">{card.chineseName}</p>}<div className="flex items-center gap-2"><Badge variant={badgeVariant(card.badgeColor)}>✓ Matched</Badge><span className="text-sm font-semibold text-success-500">Up to {card.saves}% coverage</span></div></div><div className="text-right"><p className="text-xl font-bold text-orange-500">{card.saves}%</p><p className="text-xs text-neutral-400">coverage</p><ChevronRight className="w-4 h-4 text-neutral-300 ml-auto mt-1" /></div></div></Card>)}</div></motion.div>
+      <motion.div variants={fadeUp} className="bg-teal-50 border border-teal-200 rounded-2xl p-4 flex gap-3"><span className="text-xl">💳</span><div><p className="text-sm font-bold text-teal-700">Payable amount requires confirmation</p><p className="text-sm text-teal-600 mt-0.5">Coverage percentages are estimates. Confirm actual subsidies and MediSave usage with the healthcare provider.</p></div></motion.div>
+      {message && <motion.div variants={fadeUp} className="bg-orange-50 border border-orange-200 rounded-2xl p-4 text-sm text-orange-700">{message}</motion.div>}
+      <motion.div variants={fadeUp} className="flex flex-col gap-3"><Button variant="secondary" size="md" fullWidth onClick={() => window.print()} className="gap-2"><Printer className="w-5 h-5" />Print Results</Button><Button variant="secondary" size="md" fullWidth disabled className="gap-2"><Share2 className="w-5 h-5" />Share with Doctor</Button></motion.div>
+    </motion.div>
+  </div>
 }

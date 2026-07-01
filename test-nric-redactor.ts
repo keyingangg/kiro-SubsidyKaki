@@ -1,4 +1,4 @@
-import { redactNric, redactExtractedData, FULL_NRIC_PATTERN, PARTIAL_NRIC_PATTERN, ALL_NRIC_PATTERN } from "./src/lib/nric-redactor";
+import { redactNric, redactExtractedData } from "./src/lib/nric-redactor";
 import type { RawExtractedData } from "./src/types";
 
 // Test 1: Full NRIC redaction
@@ -56,6 +56,8 @@ const rawData: RawExtractedData = {
   visitDate: "2024-01-15",
   institution: "NUH",
   rawText: "Patient F1234567C visited NUH on 2024-01-15",
+  prescriptions: [],
+  bill: null,
 };
 const result9 = redactExtractedData(rawData);
 console.log("Test 9 (extractedData):", JSON.stringify(result9, null, 2));

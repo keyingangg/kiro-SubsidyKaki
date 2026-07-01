@@ -36,7 +36,7 @@ export const T: Record<Language, Record<string, string>> = {
     you_pay: 'You pay',
     original_bill: 'Original bill',
     need_help: 'Need Help?',
-    privacy: 'Your NRIC and personal details are automatically removed before processing. We never store your documents.',
+    privacy: 'NRIC-like identifiers are redacted from extracted results. Uploaded files are not saved by this app.',
   },
   zh: {
     appName: '津贴卡基',
@@ -57,7 +57,7 @@ export const T: Record<Language, Record<string, string>> = {
     you_pay: '您支付',
     original_bill: '原始账单',
     need_help: '需要帮助？',
-    privacy: '您的身份证号码和个人详细信息将在处理前自动删除。我们从不存储您的文件。',
+    privacy: '类似身份证号码的识别信息会从提取结果中删除。本应用不会保存上传的文件。',
   },
   ms: {
     appName: 'HealthKaki',
@@ -78,7 +78,7 @@ export const T: Record<Language, Record<string, string>> = {
     you_pay: 'Anda bayar',
     original_bill: 'Bil asal',
     need_help: 'Perlu Bantuan?',
-    privacy: 'NRIC dan maklumat peribadi anda akan dikeluarkan secara automatik sebelum pemprosesan.',
+    privacy: 'Pengenal seperti NRIC dipadam daripada hasil yang diekstrak. Fail yang dimuat naik tidak disimpan oleh aplikasi ini.',
   },
   ta: {
     appName: 'சப்சிடிகாக்கி',
@@ -99,6 +99,6 @@ export const T: Record<Language, Record<string, string>> = {
     you_pay: 'நீங்கள் செலுத்துவது',
     original_bill: 'அசல் பில்',
     need_help: 'உதவி வேண்டுமா?',
-    privacy: 'உங்கள் NRIC மற்றும் தனிப்பட்ட விவரங்கள் செயல்படுத்தும் முன் தானாகவே அகற்றப்படும்.',
+    privacy: 'NRIC போன்ற அடையாளங்கள் பிரித்தெடுக்கப்பட்ட முடிவுகளிலிருந்து மறைக்கப்படும். பதிவேற்றிய கோப்புகள் சேமிக்கப்படாது.',
   },
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback } from "react";
 import DocumentCapture from "@/components/DocumentCapture";
 import LoadingProgress from "@/components/LoadingProgress";
 import ResultsDisplay from "@/components/ResultsDisplay";
@@ -46,12 +46,9 @@ export default function CheckPage() {
   const [captureMode, setCaptureMode] = useState<CaptureMode>("document");
 
   // Check if Web Speech API is available for TTS
-  const [ttsSupported, setTtsSupported] = useState(false);
-  useEffect(() => {
-    setTtsSupported(
-      typeof window !== "undefined" && "speechSynthesis" in window
-    );
-  }, []);
+  const [ttsSupported] = useState(
+    () => typeof window !== "undefined" && "speechSynthesis" in window
+  );
 
   // --- Language change handler ---
   const handleLanguageChange = useCallback((lang: SupportedLanguage) => {

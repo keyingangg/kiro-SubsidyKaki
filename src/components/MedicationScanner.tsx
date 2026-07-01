@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useCallback } from "react";
+import React, { useState, useRef, useCallback, useEffect } from "react";
 import { Pill, Camera, Check, X, AlertCircle, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { SupportedLanguage } from "@/types";
@@ -69,7 +69,6 @@ function validateMedicationFile(file: File): { valid: boolean; error?: string } 
 export function MedicationScanner({
   onSubmit,
   isProcessing,
-  language,
 }: MedicationScannerProps) {
   const [state, setState] = useState<ScannerState>("idle");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -78,6 +77,10 @@ export function MedicationScanner({
 
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => () => {
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+  }, [previewUrl]);
 
   const handleFileSelected = useCallback((file: File) => {
     const validation = validateMedicationFile(file);

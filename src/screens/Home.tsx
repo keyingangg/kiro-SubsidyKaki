@@ -1,10 +1,12 @@
+import { useRef } from 'react'
+import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { ScanLine, ImageUp, HelpCircle, ShieldCheck, ArrowRight, Settings } from 'lucide-react'
 const healthkakiLogo = '/healthkaki_logo.png'
 import { Button } from '../components/ui'
 import type { Screen } from '../types'
 
-interface Props { onNavigate: (s: Screen) => void }
+interface Props { onNavigate: (s: Screen) => void; onFileReady?: (f: File) => void }
 
 // Document types from the spec image, grouped by timing
 const BEFORE_VISIT = [
@@ -51,13 +53,28 @@ const DURING_CARE = [
   },
 ]
 
-export default function Home({ onNavigate }: Props) {
+export default function Home({ onNavigate, onFileReady }: Props) {
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const handleGalleryUpload = () => {
+    fileInputRef.current?.click()
+  }
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      onFileReady?.(file)
+      onNavigate('confirm')
+    }
+    e.target.value = ''
+  }
+
   return (
     <div className="min-h-full bg-neutral-50 flex flex-col">
       {/* Header */}
       <div className="bg-white border-b border-neutral-200 px-5 pt-3 pb-4 flex items-center justify-between">
         <div className="flex items-center">
-          <img src={healthkakiLogo} alt="HealthKaki" className="h-8 w-auto" />
+          <Image src={healthkakiLogo} alt="HealthKaki" width={144} height={32} className="h-8 w-auto" priority />
         </div>
         <button
           onClick={() => onNavigate('settings')}
@@ -83,7 +100,7 @@ export default function Home({ onNavigate }: Props) {
             Know Your Subsidies<br />in Seconds
           </h1>
           <p className="text-base text-neutral-600 max-w-xs mx-auto leading-relaxed">
-            Snap any medical document — before or after your visit — and instantly see what you're entitled to.
+            Snap any medical document — before or after your visit — and instantly see what you&apos;re entitled to.
           </p>
         </motion.div>
 
@@ -98,7 +115,7 @@ export default function Home({ onNavigate }: Props) {
             <ScanLine className="w-5 h-5" />
             Scan Medical Document
           </Button>
-          <Button variant="teal" size="lg" fullWidth onClick={() => onNavigate('confirm')} className="gap-2.5">
+          <Button variant="teal" size="lg" fullWidth onClick={handleGalleryUpload} className="gap-2.5">
             <ImageUp className="w-5 h-5" />
             Upload from Gallery
           </Button>
@@ -170,7 +187,7 @@ export default function Home({ onNavigate }: Props) {
           <div className="bg-teal-50 border border-teal-200 rounded-xl p-3.5 flex gap-2.5 mb-5">
             <ShieldCheck className="w-5 h-5 text-teal-500 flex-shrink-0 mt-0.5" />
             <p className="text-sm text-teal-700 leading-relaxed">
-              Your NRIC and personal details are automatically removed before processing. We never store your documents.
+              NRIC-like identifiers are redacted from extracted results. Uploaded files are not saved by this app.
             </p>
           </div>
 
@@ -186,6 +203,15 @@ export default function Home({ onNavigate }: Props) {
           </div>
         </motion.div>
       </div>
+
+      {/* Hidden file input for gallery upload */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/jpeg,image/png,image/webp,image/heic,application/pdf"
+        className="hidden"
+        onChange={handleFileChange}
+      />
     </div>
   )
 }

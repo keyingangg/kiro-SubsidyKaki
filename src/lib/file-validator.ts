@@ -31,6 +31,9 @@ export interface FileValidationResult {
  * Checks MIME type against the allowed list and file size ≤ 10MB.
  */
 export function validateFile(file: File): FileValidationResult {
+  if (file.size === 0) {
+    return { valid: false, error: "File is empty" };
+  }
   // Check MIME type
   if (!isAllowedMimeType(file.type)) {
     return { valid: false, error: ERROR_UNSUPPORTED_TYPE };

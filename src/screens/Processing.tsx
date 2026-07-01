@@ -1,42 +1,116 @@
 import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ShieldCheck } from 'lucide-react'
-import type { Screen } from '../types'
+import type { ProcessDocumentResponse } from '../types'
 
-interface Props { onNavigate: (s: Screen) => void }
+interface Props {
+  file: File | null
+  onComplete: (data: ProcessDocumentResponse) => void
+  onError: (message: string) => void
+}
 
 const STAGES = [
   { label: 'Scanning document…',       sub: 'Reading text and medical codes',          pct: 25 },
-  { label: 'Removing personal data…',  sub: 'Stripping NRIC and sensitive details',    pct: 50 },
+  { label: 'Redacting identifiers…',    sub: 'Removing NRIC-like identifiers from results', pct: 50 },
   { label: 'Checking your subsidies…', sub: 'Matching against MOH subsidy frameworks', pct: 75 },
-  { label: 'Calculating final cost…',  sub: 'Preparing your personalised breakdown',   pct: 100 },
+  { label: 'Preparing results…',       sub: 'Formatting the returned subsidy matches', pct: 100 },
 ]
 
 const MESSAGES = [
   'Your data is processed securely',
-  'We never store your documents',
-  'NRIC details removed automatically',
+  'Uploaded files are not saved by this app',
+  'NRIC-like identifiers are redacted from results',
   'Checking Pioneer, CHAS & Merdeka eligibility',
 ]
 
-export default function Processing({ onNavigate }: Props) {
+function isProcessDocumentResponse(value: unknown): value is ProcessDocumentResponse {
+  if (!value || typeof value !== 'object') return false
+  const candidate = value as Partial<ProcessDocumentResponse>
+  return Boolean(
+    candidate.extracted &&
+    Array.isArray(candidate.extracted.medicalCodes) &&
+    Array.isArray(candidate.extracted.diagnoses) &&
+    Array.isArray(candidate.extracted.prescriptions) &&
+    (candidate.extracted.bill === null || typeof candidate.extracted.bill === 'object') &&
+    typeof candidate.extracted.rawText === 'string' &&
+    Array.isArray(candidate.subsidies) &&
+    typeof candidate.needsManualInput === 'boolean'
+  )
+}
+
+export default function Processing({ file, onComplete, onError }: Props) {
   const [stageIdx, setStageIdx] = useState(0)
   const [msgIdx, setMsgIdx]     = useState(0)
   const [done, setDone]         = useState(false)
 
   useEffect(() => {
-    const durations = [1800, 1500, 2000, 1500]
-    let elapsed = 0
-    STAGES.forEach((_, i) => {
-      setTimeout(() => {
-        if (i < STAGES.length - 1) setStageIdx(i + 1)
-        else { setDone(true); setTimeout(() => onNavigate('results'), 800) }
-      }, elapsed + durations[i])
-      elapsed += durations[i]
-    })
+    if (!file) {
+      onError('No file selected. Please go back and select a document.')
+      return
+    }
+
+    const controller = new AbortController()
+    let completionTimer: ReturnType<typeof setTimeout> | undefined
+
+    const callApi = async () => {
+      try {
+        const formData = new FormData()
+        formData.append('file', file)
+
+        const response = await fetch('/api/process-document', {
+          method: 'POST',
+          body: formData,
+          signal: controller.signal,
+        })
+
+        if (!response.ok) {
+          let errorMessage = `Processing failed (status ${response.status})`
+          try {
+            const errorData = await response.json()
+            if (errorData.error) {
+              errorMessage = errorData.error
+            }
+          } catch {
+            // If JSON parsing fails, use the default status-based message
+          }
+          onError(errorMessage)
+          return
+        }
+
+        const data: unknown = await response.json()
+        if (!isProcessDocumentResponse(data)) {
+          onError('The processing service returned an invalid response. Please try again.')
+          return
+        }
+        setStageIdx(STAGES.length - 1)
+        setDone(true)
+        completionTimer = setTimeout(() => onComplete(data), 500)
+      } catch (err) {
+        if (controller.signal.aborted) return
+        if (err instanceof TypeError && err.message.includes('fetch')) {
+          onError('No internet connection. Please check your network and try again.')
+        } else {
+          const msg = err instanceof Error ? err.message : 'An unexpected error occurred'
+          onError(`Processing failed: ${msg}. Please try again.`)
+        }
+      }
+    }
+
+    callApi()
+    return () => {
+      controller.abort()
+      if (completionTimer) clearTimeout(completionTimer)
+    }
+  }, [file, onComplete, onError])
+
+  useEffect(() => {
+    const stageTimer = setInterval(() => setStageIdx(previous => Math.min(previous + 1, STAGES.length - 2)), 1800)
     const msgTimer = setInterval(() => setMsgIdx(p => (p + 1) % MESSAGES.length), 2000)
-    return () => clearInterval(msgTimer)
-  }, [onNavigate])
+    return () => {
+      clearInterval(stageTimer)
+      clearInterval(msgTimer)
+    }
+  }, [])
 
   const pct = done ? 100 : STAGES[stageIdx].pct
   const r   = 88

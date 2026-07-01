@@ -41,6 +41,13 @@ export default function TTSControls({
     start: number;
     end: number;
   } | null>(null);
+  const [activeContent, setActiveContent] = useState({ textContent, language });
+
+  if (activeContent.textContent !== textContent || activeContent.language !== language) {
+    setActiveContent({ textContent, language });
+    setState("idle");
+    setHighlightRange(null);
+  }
 
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
   const synthRef = useRef<SpeechSynthesis | null>(null);
@@ -59,11 +66,9 @@ export default function TTSControls({
     };
   }, []);
 
-  // Reset state when textContent or language changes
+  // Cancel playback when text or language changes.
   useEffect(() => {
     synthRef.current?.cancel();
-    setState("idle");
-    setHighlightRange(null);
   }, [textContent, language]);
 
   /**

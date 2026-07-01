@@ -1,7 +1,6 @@
 import { motion } from 'framer-motion'
 import { CheckCircle2, XCircle, Phone, ChevronRight } from 'lucide-react'
-import { Button, Card, Badge, TopBar, Divider } from '../components/ui'
-import { MOCK_RESULT } from '../lib/utils'
+import { Button, Card, Badge, TopBar } from '../components/ui'
 import type { Screen, SubsidyCard } from '../types'
 
 interface Props { onNavigate: (s: Screen) => void; subsidy: SubsidyCard | null }
@@ -10,7 +9,21 @@ const badgeVariant = (c: SubsidyCard['badgeColor']) =>
   c === 'orange' ? 'orange' as const : c === 'teal' ? 'teal' as const : c === 'navy' ? 'navy' as const : 'gray' as const
 
 export default function Details({ onNavigate, subsidy }: Props) {
-  const s = subsidy ?? MOCK_RESULT.subsidies[0]
+  const s = subsidy
+
+  if (!s) {
+    return (
+      <div className="min-h-full bg-neutral-50 flex flex-col">
+        <TopBar title="Subsidy details" onBack={() => onNavigate('results')} />
+        <div className="flex-1 grid place-items-center p-6 text-center">
+          <div>
+            <p className="font-bold text-neutral-900 mb-2">No subsidy selected</p>
+            <Button variant="primary" onClick={() => onNavigate('results')}>Back to results</Button>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-full bg-neutral-50 flex flex-col">
@@ -30,11 +43,11 @@ export default function Details({ onNavigate, subsidy }: Props) {
           <div className="grid grid-cols-2 gap-3">
             <div className="bg-success-50 border border-success-400/20 rounded-xl p-4 text-center">
               <p className="text-xs text-success-500 font-semibold uppercase mb-1">Subsidy covers</p>
-              <p className="text-3xl font-bold text-success-500">${s.saves}</p>
+              <p className="text-3xl font-bold text-success-500">{s.saves}%</p>
             </div>
             <div className="bg-orange-50 border border-orange-200 rounded-xl p-4 text-center">
               <p className="text-xs text-orange-500 font-semibold uppercase mb-1">You pay</p>
-              <p className="text-3xl font-bold text-orange-500">${s.outOfPocket}</p>
+              <p className="text-3xl font-bold text-orange-500">{s.outOfPocket}%</p>
             </div>
           </div>
         </Card>

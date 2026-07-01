@@ -6,7 +6,6 @@ import type {
   SubsidyResult,
   SupportedLanguage,
 } from "@/types";
-import { SubsidyLookupError } from "@/types";
 
 type ClinicType = "public_hospital" | "polyclinic" | "gp_clinic";
 
@@ -147,41 +146,45 @@ export async function lookupSubsidies(
   try {
     const supabase = await createClient();
 
-    // Query schemes where medical_codes overlap with our codes
-    // OR condition_keywords overlap with our diagnoses.
-    // Uses Supabase's .or() with overlap filters for PostgreSQL array overlap (&&).
-    const nonEmptyCodes = medicalCodes.filter((c) => c.trim() !== "");
-    const nonEmptyDiagnoses = diagnoses.filter((d) => d.trim() !== "");
+    const nonEmptyCodes = medicalCodes.map((c) => c.trim()).filter(Boolean).slice(0, 50);
+    const nonEmptyDiagnoses = diagnoses.map((d) => d.trim()).filter(Boolean).slice(0, 50);
 
     let allSchemes: SubsidyScheme[] = [];
 
-    if (nonEmptyCodes.length > 0 && nonEmptyDiagnoses.length > 0) {
-      // Use .or() to combine overlaps conditions
-      const { data, error } = await supabase
-        .from("subsidy_schemes")
-        .select("*")
-        .or(
-          `medical_codes.ov.{${nonEmptyCodes.join(",")}},condition_keywords.ov.{${nonEmptyDiagnoses.join(",")}}`
-        );
-
-      if (error) throw new SubsidyLookupError(error.message);
-      allSchemes = (data as SubsidyScheme[]) ?? [];
-    } else if (nonEmptyCodes.length > 0) {
+    if (nonEmptyCodes.length > 0) {
       const { data, error } = await supabase
         .from("subsidy_schemes")
         .select("*")
         .overlaps("medical_codes", nonEmptyCodes);
 
-      if (error) throw new SubsidyLookupError(error.message);
+      if (error) {
+        console.error("[subsidy-lookup] Supabase query error:", error.message, error.code);
+        return {
+          subsidies: [],
+          message: "Subsidy lookup unavailable",
+          needsManualInput: false,
+        };
+      }
       allSchemes = (data as SubsidyScheme[]) ?? [];
-    } else if (nonEmptyDiagnoses.length > 0) {
+    }
+
+    if (nonEmptyDiagnoses.length > 0) {
       const { data, error } = await supabase
         .from("subsidy_schemes")
         .select("*")
         .overlaps("condition_keywords", nonEmptyDiagnoses);
 
-      if (error) throw new SubsidyLookupError(error.message);
-      allSchemes = (data as SubsidyScheme[]) ?? [];
+      if (error) {
+        console.error("[subsidy-lookup] Supabase query error:", error.message, error.code);
+        return {
+          subsidies: [],
+          message: "Subsidy lookup unavailable",
+          needsManualInput: false,
+        };
+      }
+      const existing = new Map(allSchemes.map((scheme) => [scheme.id, scheme]));
+      for (const scheme of (data as SubsidyScheme[]) ?? []) existing.set(scheme.id, scheme);
+      allSchemes = [...existing.values()];
     }
 
     // Filter by clinic type if resolved
@@ -213,9 +216,12 @@ export async function lookupSubsidies(
       needsManualInput: false,
     };
   } catch (error) {
-    if (error instanceof SubsidyLookupError) throw error;
-    throw new SubsidyLookupError(
-      error instanceof Error ? error.message : "Subsidy lookup failed"
-    );
+    // Instead of throwing and crashing the whole pipeline, return graceful empty result
+    console.error("[subsidy-lookup] Unexpected error:", error);
+    return {
+      subsidies: [],
+      message: "Subsidy lookup unavailable",
+      needsManualInput: false,
+    };
   }
 }

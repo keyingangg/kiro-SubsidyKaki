@@ -25,16 +25,20 @@ export async function POST(request: NextRequest) {
   try {
     // Parse multipart form data
     const formData = await request.formData();
-    const file = formData.get("file") as File | null;
+    const file = formData.get("file");
 
     // --- Validation ---
 
-    if (!file) {
+    if (!(file instanceof File)) {
       return Response.json({ error: "No file provided" }, { status: 400 });
     }
 
     if (!ALLOWED_MIME_TYPES.includes(file.type)) {
       return Response.json({ error: "Unsupported file type" }, { status: 400 });
+    }
+
+    if (file.size === 0) {
+      return Response.json({ error: "File is empty" }, { status: 400 });
     }
 
     if (file.size > MAX_FILE_SIZE_BYTES) {

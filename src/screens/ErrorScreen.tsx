@@ -3,7 +3,7 @@ import { Upload, WifiOff, FileX, AlertTriangle, RefreshCw, Phone, CheckCircle2 }
 import { Button } from '../components/ui'
 import type { Screen, ErrorType } from '../types'
 
-interface Props { onNavigate: (s: Screen) => void; errorType?: ErrorType }
+interface Props { onNavigate: (s: Screen) => void; errorType?: ErrorType; errorMessage?: string | null }
 
 const ERRORS: Record<ErrorType, {
   icon: React.ElementType; iconBg: string; iconColor: string
@@ -50,7 +50,7 @@ const ERRORS: Record<ErrorType, {
   },
 }
 
-export default function ErrorScreen({ onNavigate, errorType = 'upload' }: Props) {
+export default function ErrorScreen({ onNavigate, errorType = 'upload', errorMessage }: Props) {
   const e = ERRORS[errorType]
   const IconComponent = e.icon
 
@@ -79,7 +79,11 @@ export default function ErrorScreen({ onNavigate, errorType = 'upload' }: Props)
         )}
 
         <h1 className="text-2xl font-bold text-neutral-900 mb-3 leading-snug">{e.title}</h1>
-        <p className="text-base text-neutral-500 leading-relaxed mb-9">{e.body}</p>
+        <p className="text-base text-neutral-500 leading-relaxed mb-4">{errorMessage || e.body}</p>
+        {errorMessage && errorMessage !== e.body && (
+          <p className="text-sm text-neutral-400 leading-relaxed mb-9">{e.body}</p>
+        )}
+        {!errorMessage && <div className="mb-5" />}
 
         {/* Actions */}
         <div className="flex flex-col gap-3 w-full">
